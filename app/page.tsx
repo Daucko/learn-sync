@@ -1,13 +1,5 @@
-import HeroSection from '@/components/home/hero-section';
-import FeaturesSection from '@/components/home/features-section';
-import TestimonialSection from '@/components/home/testimonial-section';
+import Homepage from '../components/home/homepage';
 
 export default function Home() {
-  return (
-    <>
-      <HeroSection />
-      <FeaturesSection />
-      <TestimonialSection />
-    </>
-  );
+  return <Homepage />;
 }

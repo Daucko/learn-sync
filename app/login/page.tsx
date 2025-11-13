@@ -3,7 +3,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, BookOpen } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme-toggle';
+
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -35,11 +38,38 @@ export default function LoginPage() {
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="flex flex-col items-center justify-center w-full lg:w-1/2 p-4 sm:p-6 lg:p-8 h-full">
+      <div className="flex flex-col items-center justify-center w-full lg:w-1/2 p-4 sm:p-6 lg:p-8 h-full dark:bg-gray-900 ">
         <div className="w-full max-w-sm flex flex-col items-center justify-center">
           {/* Logo */}
-          <div className="flex flex-col items-center pb-8">
-            <LearnSyncLogo />
+          <header className="absolute top-0 left-0 right-0 z-10 p-6 md:px-10 md:py-5">
+            <div className="mx-auto flex max-w-7xl items-center justify-between">
+              <div className="flex items-center gap-3 text-gray-900 dark:text-white">
+                <div className="size-6 text-secondary">
+                  <BookOpen className="h-6 w-6" />
+                </div>
+                <h2 className="text-lg font-bold leading-tight tracking-[-0.015em]">
+                  LearnSync
+                </h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <ThemeToggle />
+                <span className="hidden text-sm text-gray-600 dark:text-gray-400 sm:inline">
+                  Don't have an account?
+                </span>
+                <Link href="/signup">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 bg-primary hover:bg-primary/90"
+                  >
+                    SignUp
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </header>
+          <div className="flex flex-col items-center pb-8 mt-10">
+            {/* <LearnSyncLogo /> */}
             <h1 className="text-text-primary dark:text-white text-3xl font-bold leading-tight text-center mt-4">
               Login to LearnSync
             </h1>

@@ -43,9 +43,7 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Header />
           {children}
-          <Footer />
         </ThemeProvider>
       </body>
     </html>

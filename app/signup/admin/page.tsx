@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BookOpen, Eye, EyeOff } from 'lucide-react';
@@ -18,7 +18,7 @@ export default function SchoolAdminRegistration() {
     // Administrator Details
     adminName: '',
     adminEmail: '',
-    adminPassword: 'fakepassword',
+    adminPassword: '',
     adminPhone: '',
   });
   const [registrationData, setRegistrationData] = useState(null);
@@ -27,7 +27,17 @@ export default function SchoolAdminRegistration() {
     // Retrieve the registration data from sessionStorage
     const storedData = sessionStorage.getItem('registrationData');
     if (storedData) {
-      setRegistrationData(JSON.parse(storedData));
+      const parsed = JSON.parse(storedData);
+      setRegistrationData(parsed);
+
+      // Pre-fill admin fields from the initial registration
+      setFormData((prev) => ({
+        ...prev,
+        adminName: parsed.fullName || '',
+        adminEmail: parsed.email || '',
+        adminPassword: parsed.password || '',
+      }));
+
       // Optionally clear it after retrieval
       sessionStorage.removeItem('registrationData');
     }
@@ -93,6 +103,7 @@ export default function SchoolAdminRegistration() {
                         onChange={handleInputChange}
                         placeholder="Enter your school's name"
                         className="h-12 text-base"
+                        required
                       />
                     </div>
 
@@ -111,6 +122,7 @@ export default function SchoolAdminRegistration() {
                         onChange={handleInputChange}
                         placeholder="Enter your school's email"
                         className="h-12 text-base"
+                        required
                       />
                     </div>
 
@@ -129,6 +141,7 @@ export default function SchoolAdminRegistration() {
                         onChange={handleInputChange}
                         placeholder="(123) 456-7890"
                         className="h-12 text-base"
+                        required
                       />
                     </div>
 
@@ -146,6 +159,7 @@ export default function SchoolAdminRegistration() {
                         onChange={handleInputChange}
                         placeholder="123 Education Lane"
                         className="h-12 text-base"
+                        required
                       />
                     </div>
                   </div>
@@ -171,6 +185,7 @@ export default function SchoolAdminRegistration() {
                         onChange={handleInputChange}
                         placeholder="e.g. Jane Doe"
                         className="h-12 text-base"
+                        required
                       />
                     </div>
 
@@ -189,6 +204,7 @@ export default function SchoolAdminRegistration() {
                         onChange={handleInputChange}
                         placeholder="Enter your work email"
                         className="h-12 text-base"
+                        required
                       />
                     </div>
 
@@ -208,6 +224,7 @@ export default function SchoolAdminRegistration() {
                           onChange={handleInputChange}
                           placeholder="Enter a strong password"
                           className="h-12 text-base pr-12"
+                          required
                         />
                         <button
                           type="button"
@@ -241,6 +258,7 @@ export default function SchoolAdminRegistration() {
                         onChange={handleInputChange}
                         placeholder="Your direct phone number"
                         className="h-12 text-base"
+                        required
                       />
                     </div>
                   </div>
@@ -251,8 +269,11 @@ export default function SchoolAdminRegistration() {
                   <Button
                     type="submit"
                     className="min-w-40 h-12 rounded-full bg-primary hover:bg-primary/90 w-full text-base font-bold"
+                    asChild
                   >
-                    Create Account
+                    <Link href="/signup/admin/email-verification">
+                      Create Account
+                    </Link>
                   </Button>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Already have an account?{' '}
@@ -271,7 +292,4 @@ export default function SchoolAdminRegistration() {
       </div>
     </div>
   );
-}
-function useEffect(arg0: () => void, arg1: never[]) {
-  throw new Error('Function not implemented.');
 }

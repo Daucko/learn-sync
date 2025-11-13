@@ -128,7 +128,7 @@ export default function TutorRegistration() {
               <div className="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700">
                 <div
                   className="bg-secondary h-1.5 rounded-full"
-                  style={{ width: '50%' }}
+                  style={{ width: '100%' }}
                 ></div>
               </div>
 
@@ -191,7 +191,7 @@ export default function TutorRegistration() {
               <Button
                 onClick={handleStep1Continue}
                 disabled={!selectedOrganization}
-                className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90"
+                className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 cursor-pointer"
               >
                 Continue
               </Button>
@@ -385,16 +385,19 @@ export default function TutorRegistration() {
                 <div>
                   <Button
                     type="submit"
-                    className="w-full h-12 text-sm font-semibold bg-primary hover:bg-primary/90"
+                    className="w-full h-12 text-sm font-semibold bg-primary hover:bg-primary/90 cursor-pointer"
+                    asChild
                   >
-                    Create Account
+                    <Link href="/signup/tutor/pending-approval">
+                      Create Account
+                    </Link>
                   </Button>
                 </div>
               </form>
 
               <div className="text-center text-sm">
                 <Link
-                  href="/login"
+                  href="/login/"
                   className="font-medium text-secondary hover:text-secondary/80"
                 >
                   Already have an account? Log In

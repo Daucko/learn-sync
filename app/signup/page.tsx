@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { BookOpen, School, Users, Github, Square } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function RegistrationChoices() {
   const [selectedRole, setSelectedRole] = useState('student');
@@ -36,9 +37,29 @@ export default function RegistrationChoices() {
       label: 'Student',
       icon: <BookOpen className="h-8 w-8" />,
       description: 'Learn and grow with us',
-      route: '/signup/student', // You can create this later if needed
+      route: '/signup/student',
     },
   ];
+
+  const handleRoleSelect = (roleId: string) => {
+    setSelectedRole(roleId);
+
+    // Find the selected role's route
+    const selectedRoleData = roles.find((role) => role.id === roleId);
+
+    if (selectedRoleData && (roleId === 'school-admin' || roleId === 'tutor')) {
+      // Store the selected role in sessionStorage
+      sessionStorage.setItem(
+        'registrationData',
+        JSON.stringify({
+          role: roleId,
+        })
+      );
+
+      // Navigate to the appropriate registration page
+      router.push(selectedRoleData.route);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -50,23 +71,8 @@ export default function RegistrationChoices() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Find the selected role's route
-    const selectedRoleData = roles.find((role) => role.id === selectedRole);
-
-    if (selectedRoleData) {
-      // Store the basic form data in sessionStorage to use on the next page
-      sessionStorage.setItem(
-        'registrationData',
-        JSON.stringify({
-          ...formData,
-          role: selectedRole,
-        })
-      );
-
-      // Navigate to the appropriate registration page
-      router.push(selectedRoleData.route);
-    }
+    // Handle student registration
+    console.log({ ...formData, role: selectedRole });
   };
 
   return (
@@ -75,7 +81,7 @@ export default function RegistrationChoices() {
       <header className="absolute top-0 left-0 right-0 z-10 p-6 md:px-10 md:py-5">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
           <div className="flex items-center gap-3 text-gray-900 dark:text-white">
-            <div className="size-6 text-primary">
+            <div className="size-6 text-secondary">
               <BookOpen className="h-6 w-6" />
             </div>
             <h2 className="text-lg font-bold leading-tight tracking-[-0.015em]">
@@ -83,6 +89,7 @@ export default function RegistrationChoices() {
             </h2>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <span className="hidden text-sm text-gray-600 dark:text-gray-400 sm:inline">
               Already have an account?
             </span>
@@ -129,7 +136,7 @@ export default function RegistrationChoices() {
                   <button
                     key={role.id}
                     type="button"
-                    onClick={() => setSelectedRole(role.id)}
+                    onClick={() => handleRoleSelect(role.id)}
                     className={`group cursor-pointer rounded-lg border p-4 text-center transition-all ring-2 ring-transparent ring-offset-2 ring-offset-background-light focus:outline-none focus:ring-primary ${
                       selectedRole === role.id
                         ? 'border-2 border-primary bg-primary/10 ring-primary'
@@ -149,122 +156,127 @@ export default function RegistrationChoices() {
                 ))}
               </div>
 
-              {/* Registration Form */}
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-4">
+              {/* Only show form for student role */}
+              {selectedRole === 'student' && (
+                <>
+                  {/* Registration Form */}
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="space-y-4">
+                      <div>
+                        <label
+                          htmlFor="fullName"
+                          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                        >
+                          Full Name
+                        </label>
+                        <div className="mt-1">
+                          <Input
+                            id="fullName"
+                            name="fullName"
+                            type="text"
+                            required
+                            value={formData.fullName}
+                            onChange={handleInputChange}
+                            placeholder="Enter your full name"
+                            className="text-gray-900 dark:text-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="email"
+                          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                        >
+                          Email address
+                        </label>
+                        <div className="mt-1">
+                          <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            autoComplete="email"
+                            required
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            placeholder="Enter your email"
+                            className="text-gray-900 dark:text-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="password"
+                          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                        >
+                          Password
+                        </label>
+                        <div className="mt-1">
+                          <Input
+                            id="password"
+                            name="password"
+                            type="password"
+                            autoComplete="current-password"
+                            required
+                            value={formData.password}
+                            onChange={handleInputChange}
+                            placeholder="Create a password"
+                            className="text-gray-900 dark:text-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Button
+                        type="submit"
+                        className="w-full bg-primary cursor-pointer h-11 text-sm font-bold"
+                      >
+                        Continue as{' '}
+                        {roles.find((r) => r.id === selectedRole)?.label}
+                      </Button>
+                    </div>
+                  </form>
+
+                  {/* Social Login */}
                   <div>
-                    <label
-                      htmlFor="fullName"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Full Name
-                    </label>
-                    <div className="mt-1">
-                      <Input
-                        id="fullName"
-                        name="fullName"
-                        type="text"
-                        required
-                        value={formData.fullName}
-                        onChange={handleInputChange}
-                        placeholder="Enter your full name"
-                        className="text-gray-900 dark:text-white"
-                      />
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                      </div>
+                      <div className="relative flex justify-center text-sm">
+                        <span className="bg-white dark:bg-gray-800 px-2 text-gray-600 dark:text-gray-400">
+                          Or continue with
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 grid grid-cols-2 gap-3">
+                      <Button variant="outline" className="w-full h-10">
+                        <Github className="h-5 w-5" />
+                        <span className="ml-2">Google</span>
+                      </Button>
+                      <Button variant="outline" className="w-full h-10">
+                        <Square className="h-5 w-5" />
+                        <span className="ml-2">Microsoft</span>
+                      </Button>
                     </div>
                   </div>
 
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                  {/* Terms */}
+                  <p className="text-center text-xs text-gray-600 dark:text-gray-400">
+                    By creating an account, you agree to our{' '}
+                    <a
+                      href="#"
+                      className="font-medium text-primary hover:underline"
                     >
-                      Email address
-                    </label>
-                    <div className="mt-1">
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        required
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder="Enter your email"
-                        className="text-gray-900 dark:text-white"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="password"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Password
-                    </label>
-                    <div className="mt-1">
-                      <Input
-                        id="password"
-                        name="password"
-                        type="password"
-                        autoComplete="current-password"
-                        required
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        placeholder="Create a password"
-                        className="text-gray-900 dark:text-white"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <Button
-                    type="submit"
-                    className="w-full bg-accent hover:bg-accent/90 h-11 text-sm font-bold"
-                  >
-                    Continue as{' '}
-                    {roles.find((r) => r.id === selectedRole)?.label}
-                  </Button>
-                </div>
-              </form>
-
-              {/* Social Login */}
-              <div>
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="bg-white dark:bg-gray-800 px-2 text-gray-600 dark:text-gray-400">
-                      Or continue with
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-6 grid grid-cols-2 gap-3">
-                  <Button variant="outline" className="w-full h-10">
-                    <Github className="h-5 w-5" />
-                    <span className="ml-2">Google</span>
-                  </Button>
-                  <Button variant="outline" className="w-full h-10">
-                    <Square className="h-5 w-5" />
-                    <span className="ml-2">Microsoft</span>
-                  </Button>
-                </div>
-              </div>
-
-              {/* Terms */}
-              <p className="text-center text-xs text-gray-600 dark:text-gray-400">
-                By creating an account, you agree to our{' '}
-                <a
-                  href="#"
-                  className="font-medium text-primary hover:underline"
-                >
-                  Terms of Service
-                </a>
-                .
-              </p>
+                      Terms of Service
+                    </a>
+                    .
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
