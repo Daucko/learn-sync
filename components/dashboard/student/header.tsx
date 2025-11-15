@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Search, Moon, Sun } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '../theme-toggle';
+import { ThemeToggle } from '../../theme-toggle';
 
 export function Header() {
   const [isDark, setIsDark] = useState(false);
