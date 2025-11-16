@@ -7,13 +7,25 @@ import {
   BookOpen,
   Upload,
   ClipboardList,
-  FolderOpen,
   LogOut,
   Settings,
+  Bell,
+  GraduationCap,
+  LibraryBig,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const navigation = [
+interface NavigationItem {
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+interface SidebarProps {
+  navigation?: NavigationItem[];
+}
+
+const defaultNavigation: NavigationItem[] = [
   { name: 'Dashboard', href: '/tutor', icon: LayoutDashboard },
   { name: 'My Subjects', href: '/tutor/my-subjects', icon: BookOpen },
   { name: 'Upload Content', href: '/tutor/upload-content', icon: Upload },
@@ -22,14 +34,9 @@ const navigation = [
     href: '/tutor/manage-assignments',
     icon: ClipboardList,
   },
-  //   {
-  //     name: 'Student Submissions',
-  //     href: '/tutor/student-submissions',
-  //     icon: FolderOpen,
-  //   },
 ];
 
-export function Sidebar() {
+export function Sidebar({ navigation = defaultNavigation }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -42,7 +49,7 @@ export function Sidebar() {
         </div>
 
         {/* Navigation */}
-        <div className="p-4  flex flex-1 flex-col justify-between pt-4">
+        <div className="p-4 flex flex-1 flex-col justify-between pt-4">
           <div className="flex flex-col gap-2">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
@@ -66,26 +73,13 @@ export function Sidebar() {
             })}
           </div>
 
-          {/* User section */}
           <div className="flex flex-col gap-2">
-            <div className="flex gap-4 items-center p-2 rounded-lg">
-              <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium">SJ</span>
-              </div>
-              <div className="flex flex-col">
-                <h1 className="text-gray-900 text-sm font-medium">
-                  Sarah Jenkins
-                </h1>
-                <p className="text-gray-500 text-xs">Tutor</p>
-              </div>
-            </div>
-
             <Link
               href="/settings"
               className={cn(
                 'flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors',
                 pathname === '/settings'
-                  ? 'bg-text-secondary/20 text-text-secondary'
+                  ? 'bg-secondary/20 text-secondary'
                   : 'text-gray-600 hover:bg-gray-100'
               )}
             >

@@ -1,97 +1,211 @@
-import Link from 'next/link';
+// components/dashboard/tutor/SubmissionTable.tsx
+'use client';
 
-const submissions = [
+import { useState } from 'react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Eye, History, FileText } from 'lucide-react';
+import { GradeAssignment } from '@/components/dashboard/tutor/GradeAssignmentModal';
+
+interface Submission {
+  id: number;
+  studentName: string;
+  avatar: string;
+  assignment: string;
+  submitted: string;
+  status: 'Pending' | 'Graded' | 'Late';
+  statusVariant: 'secondary' | 'default' | 'destructive';
+}
+
+// Define the interface for the onGradeClick parameter
+interface GradeClickParams {
+  studentName: string;
+  assignmentTitle: string;
+}
+
+interface SubmissionTableProps {
+  onGradeClick?: (submission: GradeClickParams) => void;
+}
+
+const submissions: Submission[] = [
   {
     id: 1,
     studentName: 'Alex Johnson',
+    avatar: 'AJ',
     assignment: 'Calculus Worksheet #3',
     submitted: 'Oct 26, 2023, 10:15 AM',
     status: 'Pending',
-    statusColor: 'bg-blue-100 text-blue-800',
+    statusVariant: 'secondary',
   },
   {
     id: 2,
     studentName: 'Maria Garcia',
+    avatar: 'MG',
     assignment: 'Physics Lab Report',
     submitted: 'Oct 25, 2023, 08:30 PM',
     status: 'Graded',
-    statusColor: 'bg-green-100 text-green-800',
+    statusVariant: 'default',
   },
   {
     id: 3,
     studentName: 'James Smith',
+    avatar: 'JS',
     assignment: 'Programming Project 1',
     submitted: 'Oct 24, 2023, 11:59 PM',
     status: 'Late',
-    statusColor: 'bg-red-100 text-red-800',
+    statusVariant: 'destructive',
   },
 ];
 
-export function SubmissionTable() {
-  return (
-    <section className="mt-8">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-900">Recent Submissions</h2>
-        <Link
-          href="/student-submissions"
-          className="text-sm font-semibold text-primary hover:underline"
-        >
-          View All Submissions
-        </Link>
-      </div>
+export function SubmissionTable({ onGradeClick }: SubmissionTableProps) {
+  const [isGradeDialogOpen, setIsGradeDialogOpen] = useState(false);
+  const [selectedSubmission, setSelectedSubmission] =
+    useState<Submission | null>(null);
 
-      <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 bg-white">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Student Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Assignment
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Submitted
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Status
-                </th>
-                <th className="relative px-6 py-3">
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {submissions.map((submission) => (
-                <tr key={submission.id}>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
-                    {submission.studentName}
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                    {submission.assignment}
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-600">
-                    {submission.submitted}
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm">
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold leading-5 ${submission.statusColor}`}
-                    >
-                      {submission.status}
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                    <button className="rounded-lg bg-orange-500 px-4 py-1.5 text-sm font-semibold text-white hover:bg-orange-600 transition-colors">
-                      Grade Now
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+  const handleGradeClick = (submission: Submission) => {
+    setSelectedSubmission(submission);
+    setIsGradeDialogOpen(true);
+
+    // Also call the parent handler if provided
+    if (onGradeClick) {
+      onGradeClick({
+        studentName: submission.studentName,
+        assignmentTitle: submission.assignment,
+      });
+    }
+  };
+
+  const handleCloseGradeDialog = () => {
+    setIsGradeDialogOpen(false);
+    setSelectedSubmission(null);
+  };
+
+  const getAvatarFallback = (name: string) => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase();
+  };
+
+  return (
+    <>
+      <section className="mt-8">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-300">
+            Recent Submissions
+          </h2>
+          <Link
+            href="/tutor/student-submissions"
+            className="text-sm font-semibold text-secondary hover:underline"
+          >
+            View All Submissions
+          </Link>
         </div>
-      </div>
-    </section>
+
+        <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 ">
+          <Table>
+            <TableHeader className="bg-gray-50 dark:bg-accent">
+              <TableRow className="hover:bg-gray-50">
+                <TableHead className="p-4 text-sm font-semibold text-gray-600">
+                  Student Name
+                </TableHead>
+                <TableHead className="p-4 text-sm font-semibold text-gray-600">
+                  Assignment
+                </TableHead>
+                <TableHead className="p-4 text-sm font-semibold text-gray-600">
+                  Submitted
+                </TableHead>
+                <TableHead className="p-4 text-sm font-semibold text-gray-600">
+                  Status
+                </TableHead>
+                <TableHead className="p-4 text-sm font-semibold text-gray-600 text-right">
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {submissions.map((submission) => (
+                <TableRow
+                  key={submission.id}
+                  className="border-t border-gray-200 hover:bg-gray-50/70"
+                >
+                  <TableCell className="p-4 align-middle">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-9 w-9">
+                        <AvatarFallback className="bg-gray-100 text-gray-700 text-sm font-medium">
+                          {getAvatarFallback(submission.studentName)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-gray-900 dark:text-gray-300 text-sm font-medium">
+                        {submission.studentName}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="p-4 text-gray-600 text-sm align-middle">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-gray-400" />
+                      {submission.assignment}
+                    </div>
+                  </TableCell>
+                  <TableCell className="p-4 text-gray-600 text-sm align-middle">
+                    {submission.submitted}
+                  </TableCell>
+                  <TableCell className="p-4 align-middle">
+                    <Badge variant={submission.statusVariant}>
+                      {submission.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="p-4 text-right align-middle">
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 text-gray-600 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                        title="View Submission"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 text-gray-600 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                        title="View History"
+                      >
+                        <History className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        className="h-9 px-4 bg-primary text-white text-sm font-bold hover:opacity-90 cursor-pointer"
+                        onClick={() => handleGradeClick(submission)}
+                      >
+                        Grade Now
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </section>
+
+      {/* Grade Assignment Modal */}
+      <GradeAssignment
+        isOpen={isGradeDialogOpen}
+        onClose={handleCloseGradeDialog}
+        studentName={selectedSubmission?.studentName || ''}
+        assignmentTitle={selectedSubmission?.assignment || ''}
+      />
+    </>
   );
 }

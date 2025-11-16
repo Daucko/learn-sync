@@ -70,11 +70,11 @@ export default function NotificationsPage() {
   const [filter, setFilter] = useState('all');
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="w-full mx-auto space-y-6">
       {/* Page Heading */}
       <div className="flex items-center justify-between border-b pb-6">
         <h1 className="text-4xl font-bold">Notifications</h1>
-        <Button variant="ghost" className="text-primary">
+        <Button variant="ghost" className="text-secondary">
           Mark all as read
         </Button>
       </div>
@@ -146,7 +146,7 @@ export default function NotificationsPage() {
                 </div>
                 <Button
                   variant="ghost"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity cursor-pointers"
+                  className="opacity-0 group-hover:opacity-100 transition-opacity text-primary bg-primary/20 cursor-pointer"
                 >
                   {notification.action}
                 </Button>
