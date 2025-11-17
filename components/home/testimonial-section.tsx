@@ -16,11 +16,11 @@ export default function TestimonialSection() {
                 aria-label="Portrait of Jessica Miller, a happy student"
               />
               <div className="space-y-4">
-                <blockquote className="text-xl font-medium leading-relaxed italic">
+                {/* <blockquote className="text-xl font-medium leading-relaxed italic">
                   &ldquo;LearnSync has completely changed how I manage my
                   coursework. Everything is so intuitive and easy to find.
                   It&rsquo;s a lifesaver!&rdquo;
-                </blockquote>
+                </blockquote> */}
                 <p className="text-muted-foreground">
                   <span className="font-bold text-foreground">
                     Jessica Miller
