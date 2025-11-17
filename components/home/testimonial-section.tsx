@@ -1,3 +1,5 @@
+/* eslint-disable react/no-unescaped-entities */
+
 export default function TestimonialSection() {
   return (
     <section className="px-4 sm:px-10 py-20">
