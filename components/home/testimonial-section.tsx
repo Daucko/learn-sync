@@ -15,9 +15,9 @@ export default function TestimonialSection() {
               />
               <div className="space-y-4">
                 <blockquote className="text-xl font-medium leading-relaxed italic">
-                  "LearnSync has completely changed how I manage my coursework.
-                  Everything is so intuitive and easy to find. It's a
-                  lifesaver!"
+                  &ldquo;LearnSync has completely changed how I manage my
+                  coursework. Everything is so intuitive and easy to find.
+                  It&rsquo;s a lifesaver!&rdquo;
                 </blockquote>
                 <p className="text-muted-foreground">
                   <span className="font-bold text-foreground">
