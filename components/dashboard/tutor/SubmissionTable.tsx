@@ -14,18 +14,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Eye, History, FileText } from 'lucide-react';
+import {
+  Eye,
+  History,
+  FileText,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 import { GradeAssignment } from '@/components/dashboard/tutor/GradeAssignmentModal';
-
-interface Submission {
-  id: number;
-  studentName: string;
-  avatar: string;
-  assignment: string;
-  submitted: string;
-  status: 'Pending' | 'Graded' | 'Late';
-  statusVariant: 'secondary' | 'default' | 'destructive';
-}
+import { submissions, Submission } from '@/lib/data/submissions';
 
 // Define the interface for the onGradeClick parameter
 interface GradeClickParams {
@@ -37,40 +34,19 @@ interface SubmissionTableProps {
   onGradeClick?: (submission: GradeClickParams) => void;
 }
 
-const submissions: Submission[] = [
-  {
-    id: 1,
-    studentName: 'Alex Johnson',
-    avatar: 'AJ',
-    assignment: 'Calculus Worksheet #3',
-    submitted: 'Oct 26, 2023, 10:15 AM',
-    status: 'Pending',
-    statusVariant: 'secondary',
-  },
-  {
-    id: 2,
-    studentName: 'Maria Garcia',
-    avatar: 'MG',
-    assignment: 'Physics Lab Report',
-    submitted: 'Oct 25, 2023, 08:30 PM',
-    status: 'Graded',
-    statusVariant: 'default',
-  },
-  {
-    id: 3,
-    studentName: 'James Smith',
-    avatar: 'JS',
-    assignment: 'Programming Project 1',
-    submitted: 'Oct 24, 2023, 11:59 PM',
-    status: 'Late',
-    statusVariant: 'destructive',
-  },
-];
-
 export function SubmissionTable({ onGradeClick }: SubmissionTableProps) {
   const [isGradeDialogOpen, setIsGradeDialogOpen] = useState(false);
   const [selectedSubmission, setSelectedSubmission] =
     useState<Submission | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
+
+  // Calculate pagination
+  const totalItems = submissions.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentSubmissions = submissions.slice(startIndex, endIndex);
 
   const handleGradeClick = (submission: Submission) => {
     setSelectedSubmission(submission);
@@ -88,6 +64,18 @@ export function SubmissionTable({ onGradeClick }: SubmissionTableProps) {
   const handleCloseGradeDialog = () => {
     setIsGradeDialogOpen(false);
     setSelectedSubmission(null);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
   };
 
   const getAvatarFallback = (name: string) => {
@@ -113,7 +101,7 @@ export function SubmissionTable({ onGradeClick }: SubmissionTableProps) {
           </Link>
         </div>
 
-        <div className="mt-4 overflow-hidden rounded-xl border border-gray-200 ">
+        <div className="mt-4 overflow-hidden rounded-xl border border-gray-200">
           <Table>
             <TableHeader className="bg-gray-50 dark:bg-accent">
               <TableRow className="hover:bg-gray-50">
@@ -135,7 +123,7 @@ export function SubmissionTable({ onGradeClick }: SubmissionTableProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {submissions.map((submission) => (
+              {currentSubmissions.map((submission) => (
                 <TableRow
                   key={submission.id}
                   className="border-t border-gray-200 hover:bg-gray-50/70"
@@ -159,7 +147,14 @@ export function SubmissionTable({ onGradeClick }: SubmissionTableProps) {
                     </div>
                   </TableCell>
                   <TableCell className="p-4 text-gray-600 text-sm align-middle">
-                    {submission.submitted}
+                    {submission.late ? (
+                      <div className="flex flex-col">
+                        <span>{submission.submitted}</span>
+                        <span className="text-red-600 text-xs">Late</span>
+                      </div>
+                    ) : (
+                      submission.submitted
+                    )}
                   </TableCell>
                   <TableCell className="p-4 align-middle">
                     <Badge variant={submission.statusVariant}>
@@ -196,6 +191,34 @@ export function SubmissionTable({ onGradeClick }: SubmissionTableProps) {
               ))}
             </TableBody>
           </Table>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between border-t border-gray-200 p-4">
+            <span className="text-sm text-gray-600">
+              Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of{' '}
+              {totalItems} results
+            </span>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-gray-600 hover:bg-gray-100"
+                onClick={handlePrevPage}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-gray-600 hover:bg-gray-100"
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
 
