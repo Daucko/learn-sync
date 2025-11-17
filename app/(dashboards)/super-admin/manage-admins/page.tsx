@@ -42,7 +42,7 @@ export default function ManageSuperAdmins() {
 
         {/* Search and Filters */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div className="flex-grow max-w-lg">
+          <div className="grow max-w-lg">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input

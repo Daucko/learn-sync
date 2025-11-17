@@ -7,7 +7,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  ArrowLeft,
   Mail,
   Phone,
   Calendar,
@@ -18,9 +17,8 @@ import {
   Shield,
   Key,
   Plus,
-  Bell,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+// import { cn } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -153,7 +151,7 @@ export default function StudentProfile({ params }: StudentProfileProps) {
       {/* Profile Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-5">
-          <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+          <div className="w-24 h-24 bg-linear-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
             {student.name
               .split(' ')
               .map((n) => n[0])
