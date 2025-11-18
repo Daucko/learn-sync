@@ -80,7 +80,7 @@ export default function HomePage() {
             >
               Sign In
             </Button>
-            <Button className="bg-emerald-600 hover:bg-emerald-700">
+            <Button className="bg-primary hover:bg-primary/80">
               Get Started
             </Button>
           </div>
