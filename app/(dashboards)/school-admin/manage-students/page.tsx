@@ -42,7 +42,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-// import router from 'next/router';
 import { useRouter } from 'next/navigation';
 
 interface Student {
@@ -106,54 +105,54 @@ const initialStudents: Student[] = [
 
 export default function ManageStudents() {
   const router = useRouter();
-  const [students, setStudents] = useState(initialStudents);
-  const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [students, setStudents] = useState<Student[]>(initialStudents);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<
     'suspend' | 'activate' | 'delete' | ''
   >('');
 
   // Action handlers
-  const handleViewProfile = (student: any) => {
+  const handleViewProfile = (student: Student) => {
     router.push(`/school-admin/manage-students/${student.id}`);
   };
 
-  const handleEditStudent = (student: any) => {
+  const handleEditStudent = (student: Student) => {
     // Open edit modal or navigate to edit page
     alert(`Editing student: ${student.name}`);
     // setEditStudent(student)
     // setIsEditModalOpen(true)
   };
 
-  const handleSendEmail = (student: any) => {
+  const handleSendEmail = (student: Student) => {
     // Open email composer or send automated email
     window.location.href = `mailto:${student.email}?subject=LearnSync Communication`;
   };
 
-  const handleContactParent = (student: any) => {
+  const handleContactParent = (student: Student) => {
     // Open parent contact modal or initiate contact
     alert(`Contacting parent: ${student.parent} for ${student.name}`);
   };
 
-  const handleSuspendStudent = (student: any) => {
+  const handleSuspendStudent = (student: Student) => {
     setSelectedStudent(student);
     setDialogType('suspend');
     setIsDialogOpen(true);
   };
 
-  const handleActivateStudent = (student: any) => {
+  const handleActivateStudent = (student: Student) => {
     setSelectedStudent(student);
     setDialogType('activate');
     setIsDialogOpen(true);
   };
 
-  const handleDeleteStudent = (student: any) => {
+  const handleDeleteStudent = (student: Student) => {
     setSelectedStudent(student);
     setDialogType('delete');
     setIsDialogOpen(true);
   };
 
-  const handleExportData = (student: any) => {
+  const handleExportData = (student: Student) => {
     // Export student data as CSV/PDF
     const data = `Student Data:\nName: ${student.name}\nEmail: ${student.email}\nGrade: ${student.grade}\nParent: ${student.parent}\nStatus: ${student.status}`;
     const blob = new Blob([data], { type: 'text/plain' });

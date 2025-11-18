@@ -12,6 +12,7 @@ import {
   Plus,
   TrendingUp,
   ArrowUpRight,
+  Upload,
 } from 'lucide-react';
 import {
   BarChart,
@@ -40,11 +41,17 @@ interface StatItem {
   title: string;
   value: string;
   change: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   trend: 'positive' | 'action';
   highlight?: boolean;
   clickable?: boolean;
   href?: string;
+}
+
+interface ActivityItem {
+  icon: React.ComponentType<{ className?: string }> | string;
+  title: string;
+  time: string;
 }
 
 // Mock data for the chart
@@ -93,14 +100,14 @@ export default function Dashboard() {
     },
   ];
 
-  const activities = [
+  const activities: ActivityItem[] = [
     {
       icon: UserCheck,
       title: 'New tutor Jane Doe was added.',
       time: '2 hours ago',
     },
     {
-      icon: 'upload',
+      icon: Upload,
       title: 'John Smith submitted an assignment.',
       time: '5 hours ago',
     },
@@ -133,10 +140,19 @@ export default function Dashboard() {
     return null;
   };
 
-  const handleStatClick = (stat: any) => {
+  const handleStatClick = (stat: StatItem) => {
     if (stat.clickable && stat.href) {
       router.push(stat.href);
     }
+  };
+
+  const renderActivityIcon = (activity: ActivityItem) => {
+    if (typeof activity.icon === 'string') {
+      return <div className="w-5 h-5">{activity.icon}</div>;
+    }
+
+    const IconComponent = activity.icon;
+    return <IconComponent className="w-5 h-5" />;
   };
 
   return (
@@ -253,7 +269,7 @@ export default function Dashboard() {
             {activities.map((activity, index) => (
               <div key={index} className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100 text-green-600">
-                  <activity.icon className="w-5 h-5" />
+                  {renderActivityIcon(activity)}
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium">{activity.title}</p>
