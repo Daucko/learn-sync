@@ -85,11 +85,15 @@ export default function Header() {
                   <Button
                     variant="ghost"
                     className="w-full justify-start text-gray-600 dark:text-gray-300"
+                    asChild
                   >
-                    Sign In
+                    <Link href="/login">Sign In</Link>
                   </Button>
-                  <Button className="w-full justify-start bg-emerald-600 hover:bg-emerald-700 mt-2">
-                    Get Started
+                  <Button
+                    className="w-full justify-start bg-emerald-600 hover:bg-emerald-700 mt-2"
+                    asChild
+                  >
+                    <Link href="/signup">Get Started</Link>
                   </Button>
                 </div>
               </div>
