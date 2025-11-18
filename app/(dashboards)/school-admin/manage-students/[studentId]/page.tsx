@@ -18,7 +18,6 @@ import {
   Key,
   Plus,
 } from 'lucide-react';
-// import { cn } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
@@ -29,13 +28,56 @@ import {
 } from '@/components/ui/dialog';
 import { AddSubjectDialog } from '@/components/dashboard/school-admin/AddSubjectDialog';
 
+// Types
+interface Subject {
+  id: string;
+  name: string;
+}
+
+interface ParentInfo {
+  name: string;
+  email: string;
+  phone: string;
+}
+
+interface StudentData {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  gradeLevel: string;
+  avatar: string;
+  enrollmentStatus: string;
+  enrollmentDate: string;
+  parent: ParentInfo;
+  enrolledSubjects: Subject[];
+}
+
 interface StudentProfileProps {
   params: {
     id: string;
   };
 }
 
-const mockStudentData = {
+// Add the Teacher interface here
+interface Teacher {
+  id: string;
+  name: string;
+  email: string;
+}
+
+interface NewSubjectData {
+  subjectName: string;
+  subjectCode: string;
+  gradeLevel: string;
+  academicYear: string;
+  description: string;
+  maxStudents: string;
+  assignedTeachers: Teacher[];
+}
+
+const mockStudentData: StudentData = {
   id: '12345678',
   name: 'Jane Doe',
   email: 'jane.doe@email.com',
@@ -65,7 +107,7 @@ export default function StudentProfile({ params }: StudentProfileProps) {
   const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] =
     useState(false);
   const [isAddSubjectDialogOpen, setIsAddSubjectDialogOpen] = useState(false);
-  const [student, setStudent] = useState(mockStudentData);
+  const [student, setStudent] = useState<StudentData>(mockStudentData);
 
   const handleBack = () => {
     router.push('/school-admin/students');
@@ -112,12 +154,12 @@ export default function StudentProfile({ params }: StudentProfileProps) {
     setIsAddSubjectDialogOpen(true);
   };
 
-  const handleSubjectAdded = (newSubjectData: any) => {
+  const handleSubjectAdded = (newSubjectData: NewSubjectData) => {
     // Handle the new subject data from the dialog
     console.log('New subject data:', newSubjectData);
 
     // Create a mock subject object to add to the student's enrolled subjects
-    const newSubject = {
+    const newSubject: Subject = {
       id: Date.now().toString(),
       name: `${newSubjectData.subjectName} - Grade ${student.gradeLevel}`,
     };
@@ -354,8 +396,7 @@ export default function StudentProfile({ params }: StudentProfileProps) {
       <AddSubjectDialog
         open={isAddSubjectDialogOpen}
         onOpenChange={setIsAddSubjectDialogOpen}
-        // You can pass additional props if needed, for example:
-        // onSubjectAdded={handleSubjectAdded}
+        onSubjectAdded={handleSubjectAdded}
       />
 
       {/* Suspend Student Dialog */}

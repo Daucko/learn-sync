@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Sidebar } from '@/components/dashboard/tutor/Sidebar';
 import { TopNav } from '@/components/dashboard/tutor/TopNav';
 import { SchoolAdminSidebar } from '@/components/dashboard/school-admin/SchoolAdminSidebar';
 

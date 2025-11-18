@@ -30,9 +30,20 @@ interface Teacher {
   email: string;
 }
 
+interface NewSubjectData {
+  subjectName: string;
+  subjectCode: string;
+  gradeLevel: string;
+  academicYear: string;
+  description: string;
+  maxStudents: string;
+  assignedTeachers: Teacher[];
+}
+
 interface AddSubjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSubjectAdded?: (newSubjectData: NewSubjectData) => void;
 }
 
 const mockTeachers: Teacher[] = [
@@ -46,6 +57,7 @@ const mockTeachers: Teacher[] = [
 export function AddSubjectDialog({
   open,
   onOpenChange,
+  onSubjectAdded,
 }: AddSubjectDialogProps) {
   const [formData, setFormData] = useState({
     subjectName: '',
@@ -95,11 +107,25 @@ export function AddSubjectDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Create the complete subject data
+    const newSubjectData: NewSubjectData = {
+      ...formData,
+      assignedTeachers,
+    };
+
     // Handle form submission here
     console.log('Form data:', formData);
     console.log('Assigned teachers:', assignedTeachers);
+
+    // Call the callback if provided
+    if (onSubjectAdded) {
+      onSubjectAdded(newSubjectData);
+    }
+
     // You would typically make an API call here
     onOpenChange(false);
+
     // Reset form
     setFormData({
       subjectName: '',
@@ -109,6 +135,8 @@ export function AddSubjectDialog({
       description: '',
       maxStudents: '',
     });
+    setAssignedTeachers([mockTeachers[0], mockTeachers[1]]);
+    setAvailableTeachers(mockTeachers.slice(2));
   };
 
   return (

@@ -45,8 +45,18 @@ import {
 // import router from 'next/router';
 import { useRouter } from 'next/navigation';
 
+interface Student {
+  id: number;
+  name: string;
+  email: string;
+  grade: string;
+  parent: string;
+  status: 'active' | 'pending' | 'suspended';
+  enrollmentDate: string;
+}
+
 // Mock data
-const initialStudents = [
+const initialStudents: Student[] = [
   {
     id: 1,
     name: 'Olivia Chen',

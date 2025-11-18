@@ -26,6 +26,27 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { AddSubjectDialog } from '@/components/dashboard/school-admin/AddSubjectDialog';
 
+// Types
+interface TooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    value: number;
+    dataKey: string;
+  }>;
+  label?: string;
+}
+
+interface StatItem {
+  title: string;
+  value: string;
+  change: string;
+  icon: any;
+  trend: 'positive' | 'action';
+  highlight?: boolean;
+  clickable?: boolean;
+  href?: string;
+}
+
 // Mock data for the chart
 const enrollmentData = [
   { week: 'Week 1', enrollments: 45, fill: '#dcfce7' },
@@ -38,7 +59,7 @@ export default function Dashboard() {
   const router = useRouter();
   const [isAddSubjectDialogOpen, setIsAddSubjectDialogOpen] = useState(false);
 
-  const stats = [
+  const stats: StatItem[] = [
     {
       title: 'Total Organizations',
       value: '12',
@@ -100,7 +121,7 @@ export default function Dashboard() {
     },
   ];
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-sm">
