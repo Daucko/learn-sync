@@ -1,26 +1,6 @@
-// import React from 'react';
-// import HeroSection from '@/components/home/hero-section';
-// import FeaturesSection from '@/components/home/features-section';
-// import Header from './header';
-// import Footer from './footer';
-
-// const Homepage = () => {
-//   return (
-//     <>
-//       <Header />
-//       <HeroSection />
-//       <FeaturesSection />
-//       <Footer />
-//     </>
-//   );
-// };
-
-// export default Homepage;
-
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/theme-toggle';
 import {
   GraduationCap,
   Upload,
@@ -32,107 +12,16 @@ import {
   ArrowRight,
   Menu,
 } from 'lucide-react';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Card, CardContent } from '@/components/ui/card';
 import Footer from './footer';
 import Link from 'next/link';
+import Header from './header';
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-linear-to-b from-emerald-50 to-white dark:from-gray-900 dark:to-gray-950">
       {/* Navigation */}
-      <nav className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <GraduationCap className="h-8 w-8 text-emerald-600" />
-            <span className="text-2xl font-bold text-gray-900 dark:text-white">
-              LearnSync
-            </span>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
-            <a
-              href="#features"
-              className="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-            >
-              Features
-            </a>
-            <a
-              href="#how-it-works"
-              className="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-            >
-              How It Works
-            </a>
-            <a
-              href="#pricing"
-              className="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-            >
-              Pricing
-            </a>
-          </div>
-
-          {/* Desktop Header Actions - Hidden on mobile */}
-          <div className="hidden sm:flex items-center gap-3">
-            <ThemeToggle />
-            <Button
-              variant="ghost"
-              className="text-gray-600 dark:text-gray-300"
-              asChild
-            >
-              <Link href="/login">Sign In</Link>
-            </Button>
-            <Button className="bg-primary hover:bg-primary/80" asChild>
-              <Link href="/signup">Get Started</Link>
-            </Button>
-          </div>
-
-          {/* Mobile Menu - Show on small screens */}
-          <div className="sm:hidden flex items-center gap-2">
-            <ThemeToggle />
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-60 sm:w-[340px]">
-                <div className="flex flex-col gap-6 mt-8">
-                  <a
-                    href="#features"
-                    className="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                  >
-                    Features
-                  </a>
-                  <a
-                    href="#how-it-works"
-                    className="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                  >
-                    How It Works
-                  </a>
-                  <a
-                    href="#pricing"
-                    className="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                  >
-                    Pricing
-                  </a>
-                  <div className="border-t pt-4">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start text-gray-600 dark:text-gray-300"
-                    >
-                      Sign In
-                    </Button>
-                    <Button className="w-full justify-start bg-emerald-600 hover:bg-emerald-700 mt-2">
-                      Get Started
-                    </Button>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-      </nav>
+      <Header />
 
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-28">

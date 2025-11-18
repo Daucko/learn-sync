@@ -1,58 +1,102 @@
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, GraduationCap, Menu } from 'lucide-react';
 import Link from 'next/link';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm px-4 sm:px-10 py-4">
-      <div className="flex items-center justify-between max-w-7xl mx-auto">
-        <div className="flex items-center gap-3">
-          <div className="w-6 h-6 text-secondary">
-            <BookOpen className="w-6 h-6" />
-          </div>
-          <h2 className="text-xl font-bold">LearnSync</h2>
+    <nav className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <GraduationCap className="h-8 w-8 text-emerald-600" />
+          <span className="text-2xl font-bold text-gray-900 dark:text-white">
+            LearnSync
+          </span>
         </div>
 
-        <div className="flex items-center gap-4">
-          <nav className="hidden md:flex items-center gap-8">
-            <a
-              href="#"
-              className="text-sm font-medium hover:text-secondary transition-colors"
-            >
-              Features
-            </a>
-            <a
-              href="#"
-              className="text-sm font-medium hover:text-secondary transition-colors"
-            >
-              For Tutors
-            </a>
-            <a
-              href="#"
-              className="text-sm font-medium hover:text-secondary transition-colors"
-            >
-              FAQ
-            </a>
-          </nav>
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-8">
+          <a
+            href="#features"
+            className="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+          >
+            Features
+          </a>
+          <a
+            href="#how-it-works"
+            className="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+          >
+            How It Works
+          </a>
+          <a
+            href="#pricing"
+            className="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+          >
+            Pricing
+          </a>
+        </div>
 
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/login">Login</Link>
+        {/* Desktop Header Actions - Hidden on mobile */}
+        <div className="hidden sm:flex items-center gap-3">
+          <ThemeToggle />
+          <Button
+            variant="ghost"
+            className="text-gray-600 dark:text-gray-300"
+            asChild
+          >
+            <Link href="/login">Sign In</Link>
+          </Button>
+          <Button className="bg-primary hover:bg-primary/80" asChild>
+            <Link href="/signup">Get Started</Link>
+          </Button>
+        </div>
+
+        {/* Mobile Menu - Show on small screens */}
+        <div className="sm:hidden flex items-center gap-2">
+          <ThemeToggle />
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5" />
               </Button>
-              <Button
-                size="sm"
-                className="bg-primary hover:bg-primary/90"
-                asChild
-              >
-                <Link href="/signup">Sign Up</Link>
-              </Button>
-            </div>
-          </div>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-60 sm:w-[340px]">
+              <div className="flex flex-col gap-6 mt-8">
+                <a
+                  href="#features"
+                  className="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                >
+                  Features
+                </a>
+                <a
+                  href="#how-it-works"
+                  className="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                >
+                  How It Works
+                </a>
+                <a
+                  href="#pricing"
+                  className="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                >
+                  Pricing
+                </a>
+                <div className="border-t pt-4">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start text-gray-600 dark:text-gray-300"
+                  >
+                    Sign In
+                  </Button>
+                  <Button className="w-full justify-start bg-emerald-600 hover:bg-emerald-700 mt-2">
+                    Get Started
+                  </Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
-    </header>
+    </nav>
   );
 }
