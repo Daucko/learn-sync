@@ -37,7 +37,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-linear-to-b from-emerald-50 to-white dark:from-gray-900 dark:to-gray-950">
       {/* Navigation */}
       <nav className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 sm:px-3 py-4 flex items-center justify-between sm:gap-2">
           <div className="flex items-center gap-2">
             <GraduationCap className="h-8 w-8 text-emerald-600" />
             <span className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -64,7 +64,7 @@ export default function HomePage() {
               Pricing
             </a>
           </div>
-          <div className="flex items-center gap-3 sm:gap-1">
+          <div className="flex items-center justify-between md:gap-3">
             <ThemeToggle />
             <Button
               variant="ghost"
