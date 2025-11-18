@@ -64,7 +64,7 @@ export default function HomePage() {
               Pricing
             </a>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 sm:gap-1">
             <ThemeToggle />
             <Button
               variant="ghost"
