@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Card, CardContent } from '@/components/ui/card';
+import Footer from './footer';
 
 export default function HomePage() {
   return (
@@ -411,7 +412,7 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-gray-50 dark:bg-gray-900 py-12">
+      {/* <footer className="border-t bg-gray-50 dark:bg-gray-900 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid md:grid-cols-4 gap-6 sm:gap-8 mb-8">
             <div>
@@ -521,7 +522,8 @@ export default function HomePage() {
             <p>&copy; 2025 LearnSync. All rights reserved.</p>
           </div>
         </div>
-      </footer>
+      </footer> */}
+      <Footer />
     </div>
   );
 }
