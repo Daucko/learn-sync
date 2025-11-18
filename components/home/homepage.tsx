@@ -35,6 +35,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Card, CardContent } from '@/components/ui/card';
 import Footer from './footer';
+import Link from 'next/link';
 
 export default function HomePage() {
   return (
@@ -77,11 +78,12 @@ export default function HomePage() {
             <Button
               variant="ghost"
               className="text-gray-600 dark:text-gray-300"
+              asChild
             >
-              Sign In
+              <Link href="/login">Sign In</Link>
             </Button>
-            <Button className="bg-primary hover:bg-primary/80">
-              Get Started
+            <Button className="bg-primary hover:bg-primary/80" asChild>
+              <Link href="/signup">Get Started</Link>
             </Button>
           </div>
 
