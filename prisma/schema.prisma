@@ -1,0 +1,107 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum Role {
+    STUDENT
+    TUTOR
+    SCHOOL_ADMIN
+    SUPER_ADMIN
+}
+
+model User {
+    id             String          @id @default(uuid()) @db.Uuid
+    clerkId        String          @unique
+    email          String?         @unique
+    name           String?
+    avatarUrl      String?
+    role           Role            @default(STUDENT)
+    organization   Organization?   @relation(fields: [organizationId], references: [id])
+    organizationId String?         @db.Uuid
+    createdAt      DateTime        @default(now())
+    updatedAt      DateTime        @updatedAt
+    submissions    Submission[]
+    uploads        ContentUpload[]
+    notifications  Notification[]
+    coursesTutored Course[]        @relation("CourseTutor")
+}
+
+model Organization {
+    id        String    @id @default(uuid()) @db.Uuid
+    name      String
+    domain    String?
+    users     User[]
+    subjects  Subject[]
+    createdAt DateTime  @default(now())
+}
+
+model Subject {
+    id      String       @id @default(uuid()) @db.Uuid
+    name    String
+    org     Organization @relation(fields: [orgId], references: [id])
+    orgId   String       @db.Uuid
+    courses Course[]
+}
+
+model Course {
+    id          String       @id @default(uuid()) @db.Uuid
+    title       String
+    description String?
+    subject     Subject?     @relation(fields: [subjectId], references: [id])
+    subjectId   String?      @db.Uuid
+    tutor       User?        @relation("CourseTutor", fields: [tutorId], references: [id])
+    tutorId     String?      @db.Uuid
+    assignments Assignment[]
+    createdAt   DateTime     @default(now())
+}
+
+model Assignment {
+    id          String       @id @default(uuid()) @db.Uuid
+    title       String
+    description String?
+    course      Course       @relation(fields: [courseId], references: [id])
+    courseId    String       @db.Uuid
+    dueDate     DateTime?
+    submissions Submission[]
+    createdAt   DateTime     @default(now())
+}
+
+model Submission {
+    id            String     @id @default(uuid()) @db.Uuid
+    assignment    Assignment @relation(fields: [assignmentId], references: [id])
+    assignmentId  String     @db.Uuid
+    student       User       @relation(fields: [studentId], references: [id])
+    studentId     String     @db.Uuid
+    submissionUrl String
+    submittedAt   DateTime   @default(now())
+    grade         String?
+    feedback      String?
+    status        String     @default("Pending")
+}
+
+model ContentUpload {
+    id         String   @id @default(uuid()) @db.Uuid
+    uploader   User     @relation(fields: [uploaderId], references: [id])
+    uploaderId String   @db.Uuid
+    fileUrl    String
+    mimeType   String?
+    type       String?
+    status     String   @default("uploaded")
+    metadata   Json?
+    createdAt  DateTime @default(now())
+}
+
+model Notification {
+    id        String    @id @default(uuid()) @db.Uuid
+    user      User      @relation(fields: [userId], references: [id])
+    userId    String    @db.Uuid
+    type      String
+    payload   Json
+    readAt    DateTime?
+    createdAt DateTime  @default(now())
+}

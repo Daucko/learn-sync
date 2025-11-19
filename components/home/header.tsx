@@ -65,19 +65,19 @@ export default function Header() {
               <div className="flex flex-col gap-6 mt-8">
                 <a
                   href="#features"
-                  className="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                  className="text-foreground hover:text-secondary transition-colors"
                 >
                   Features
                 </a>
                 <a
                   href="#how-it-works"
-                  className="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                  className="text-foreground hover:text-secondary transition-colors"
                 >
                   How It Works
                 </a>
                 <a
                   href="#pricing"
-                  className="text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                  className="text-foreground hover:text-secondary transition-colors"
                 >
                   Pricing
                 </a>
@@ -90,7 +90,7 @@ export default function Header() {
                     <Link href="/login">Sign In</Link>
                   </Button>
                   <Button
-                    className="w-full justify-start bg-emerald-600 hover:bg-emerald-700 mt-2"
+                    className="w-full justify-start bg-secondary hover:bg-secondary/80 mt-2"
                     asChild
                   >
                     <Link href="/signup">Get Started</Link>
