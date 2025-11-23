@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { currentUser, clerkClient } from '@clerk/nextjs/server';
+import z, { zodErrorMessage } from '@/lib/validators';
 
 export async function POST(req: Request) {
   try {
@@ -11,7 +12,12 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const role = (body?.role as string) ?? 'student';
+    try {
+      const parsed = z.object({ role: z.string().optional() }).parse(body);
+      var role = (parsed.role as string | undefined) ?? 'student';
+    } catch (e: any) {
+      return NextResponse.json({ error: zodErrorMessage(e) }, { status: 422 });
+    }
 
     // fetch clerk user details to populate email/name
     const clerkUser = await clerkClient.users.getUser(userId);

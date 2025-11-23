@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { requireAuth, ok, err } from '@/lib/api';
+import { AssignmentUpdateSchema, zodErrorMessage } from '@/lib/validators';
 
 export async function GET(_req: Request, { params }: { params: any }) {
   try {
@@ -17,13 +18,14 @@ export async function PUT(req: Request, { params }: { params: any }) {
   try {
     await requireAuth();
     const body = await req.json();
+    const parsed = AssignmentUpdateSchema.parse(body);
     const updated = await prisma.assignment.update({
       where: { id: params.id },
-      data: body,
+      data: parsed,
     });
     return ok(updated);
   } catch (e: any) {
-    return err(e.message || 'Error updating assignment');
+    return err(zodErrorMessage(e) || e.message || 'Error updating assignment', 422);
   }
 }
 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, ok, err } from '@/lib/api';
+import { OrganizationCreateSchema, zodErrorMessage } from '@/lib/validators';
 
 export async function GET() {
   try {
@@ -17,9 +18,13 @@ export async function POST(req: Request) {
   try {
     await requireAuth();
     const body = await req.json();
-    const created = await prisma.organization.create({ data: body });
+    const parsed = OrganizationCreateSchema.parse(body);
+    const created = await prisma.organization.create({ data: parsed });
     return ok(created);
   } catch (e: any) {
-    return err(e.message || 'Error creating organization');
+    return err(
+      zodErrorMessage(e) || e.message || 'Error creating organization',
+      422
+    );
   }
 }

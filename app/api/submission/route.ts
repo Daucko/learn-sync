@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { requireAuth, ok, err } from '@/lib/api';
+import { SubmissionCreateSchema, zodErrorMessage } from '@/lib/validators';
 
 export async function GET() {
   try {
@@ -14,9 +15,13 @@ export async function POST(req: Request) {
   try {
     await requireAuth();
     const body = await req.json();
-    const created = await prisma.submission.create({ data: body });
+    const parsed = SubmissionCreateSchema.parse(body);
+    const created = await prisma.submission.create({ data: parsed });
     return ok(created);
   } catch (e: any) {
-    return err(e.message || 'Error creating submission');
+    return err(
+      zodErrorMessage(e) || e.message || 'Error creating submission',
+      422
+    );
   }
 }
