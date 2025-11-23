@@ -78,10 +78,15 @@ export const ContentUploadUpdateSchema = ContentUploadCreateSchema.partial();
 
 // Generic helper to return structured error messages from Zod
 export function zodErrorMessage(err: unknown) {
+  // Prefer the ZodError structure when possible
+  if (err instanceof z.ZodError) {
+    return err.errors.map((e) => e.message).join(', ');
+  }
+  // Fallback: try to extract `errors` property if present
   if (err && typeof err === 'object' && 'errors' in err) {
     try {
-      // @ts-ignore
-      return (err.errors as any[]).map((e) => e.message).join(', ');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (err as any).errors.map((e: any) => e.message).join(', ');
     } catch {
       return 'Invalid request payload';
     }

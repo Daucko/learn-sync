@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { currentUser, auth } from '@clerk/nextjs/server';
+import { currentUser } from '@clerk/nextjs/server';
 
 export function ok(data: unknown) {
   return NextResponse.json({ success: true, data });

@@ -6,8 +6,9 @@ export async function GET() {
   try {
     const items = await prisma.submission.findMany();
     return ok(items);
-  } catch (e: any) {
-    return err(e.message || 'Error fetching submissions');
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
+    return err(message || 'Error fetching submissions');
   }
 }
 
@@ -18,9 +19,10 @@ export async function POST(req: Request) {
     const parsed = SubmissionCreateSchema.parse(body);
     const created = await prisma.submission.create({ data: parsed });
     return ok(created);
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
     return err(
-      zodErrorMessage(e) || e.message || 'Error creating submission',
+      zodErrorMessage(e) || message || 'Error creating submission',
       422
     );
   }

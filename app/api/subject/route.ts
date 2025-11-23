@@ -6,8 +6,9 @@ export async function GET() {
   try {
     const items = await prisma.subject.findMany();
     return ok(items);
-  } catch (e: any) {
-    return err(e.message || 'Error fetching subjects');
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
+    return err(message || 'Error fetching subjects');
   }
 }
 
@@ -18,7 +19,8 @@ export async function POST(req: Request) {
     const parsed = SubjectCreateSchema.parse(body);
     const created = await prisma.subject.create({ data: parsed });
     return ok(created);
-  } catch (e: any) {
-    return err(zodErrorMessage(e) || e.message || 'Error creating subject', 422);
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
+    return err(zodErrorMessage(e) || message || 'Error creating subject', 422);
   }
 }

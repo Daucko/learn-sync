@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { currentUser, clerkClient } from '@clerk/nextjs/server';
 import z, { zodErrorMessage } from '@/lib/validators';
+import type { UserRole } from '@prisma/client';
 
 export async function POST(req: Request) {
   try {
@@ -12,10 +13,11 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
+    let role = 'student';
     try {
       const parsed = z.object({ role: z.string().optional() }).parse(body);
-      var role = (parsed.role as string | undefined) ?? 'student';
-    } catch (e: any) {
+      role = (parsed.role as string | undefined) ?? 'student';
+    } catch (e: unknown) {
       return NextResponse.json({ error: zodErrorMessage(e) }, { status: 422 });
     }
 
@@ -35,7 +37,7 @@ export async function POST(req: Request) {
           clerkId: userId,
           email,
           fullName,
-          role: normalized as any,
+          role: normalized as unknown as UserRole,
         },
       });
       // Set Clerk public metadata role as slug (e.g. 'school-admin')

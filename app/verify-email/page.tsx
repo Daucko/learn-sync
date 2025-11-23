@@ -75,10 +75,14 @@ export default function VerifyEmail() {
         setError('Verification failed. Please try again.');
         console.log('Verification incomplete:', result);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error verifying email:', err);
-      if (err.errors) {
-        setError(err.errors[0]?.message || 'Invalid verification code');
+      const maybeErr = err as { errors?: unknown };
+      if (maybeErr.errors && Array.isArray(maybeErr.errors)) {
+        const first = maybeErr.errors[0] as Record<string, unknown> | undefined;
+        const message =
+          typeof first?.message === 'string' ? first.message : undefined;
+        setError(message ?? 'Invalid verification code');
       } else {
         setError('An error occurred during verification');
       }

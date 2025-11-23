@@ -6,8 +6,9 @@ export async function GET() {
   try {
     const items = await prisma.user.findMany();
     return ok(items);
-  } catch (e: any) {
-    return err(e.message || 'Error fetching users');
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
+    return err(message || 'Error fetching users');
   }
 }
 
@@ -18,7 +19,8 @@ export async function POST(req: Request) {
     const parsed = UserCreateSchema.parse(body);
     const created = await prisma.user.create({ data: parsed });
     return ok(created);
-  } catch (e: any) {
-    return err(zodErrorMessage(e) || e.message || 'Error creating user', 422);
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
+    return err(zodErrorMessage(e) || message || 'Error creating user', 422);
   }
 }

@@ -101,24 +101,34 @@ export default function SchoolAdminRegistration() {
 
       // Redirect to verification page
       router.push('/verify-email');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error during school admin sign-up:', err);
 
-      // Enhanced error handling
-      if (err.errors) {
-        const error = err.errors[0];
-        if (error.code === 'form_identifier_exists') {
+      const maybeErr = err as { errors?: unknown };
+      if (maybeErr.errors && Array.isArray(maybeErr.errors)) {
+        const error = maybeErr.errors[0] as Record<string, unknown> | undefined;
+        const code =
+          typeof error?.code === 'string' ? (error.code as string) : undefined;
+        if (code === 'form_identifier_exists') {
           alert(
             'An account with this email already exists. Please log in instead.'
           );
-        } else if (error.code === 'form_password_length_too_short') {
+        } else if (code === 'form_password_length_too_short') {
           alert('Password must be at least 8 characters long.');
-        } else if (error.code === 'form_password_pwned') {
+        } else if (code === 'form_password_pwned') {
           alert(
             'This password has been compromised. Please choose a different password.'
           );
         } else {
-          alert(`Error: ${error.longMessage || error.message}`);
+          const longMessage =
+            typeof error?.longMessage === 'string'
+              ? (error.longMessage as string)
+              : undefined;
+          const message =
+            typeof error?.message === 'string'
+              ? (error.message as string)
+              : undefined;
+          alert(`Error: ${longMessage ?? message ?? 'Unknown error'}`);
         }
       } else {
         alert('An unexpected error occurred. Please try again.');

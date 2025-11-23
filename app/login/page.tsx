@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { BookOpen } from 'lucide-react';
+// removed unused BookOpen import
 import { ThemeToggle } from '@/components/theme-toggle';
 import LearnSync from '@/components/assets/LearnSync-logo (2).png';
 
 import Link from 'next/link';
-import { SignIn, SignInButton, useUser } from '@clerk/nextjs';
+import { SignIn, useUser } from '@clerk/nextjs';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 
@@ -68,19 +68,23 @@ export default function LoginPage() {
           window.location.href = mapping[normalizedRole] ?? '/';
         } else {
           // try to get detailed error
-          let body: any = null;
+          let body: unknown = null;
           try {
             body = await res.json();
           } catch (_) {
             /* ignore */
           }
+          const bodyObj =
+            body && typeof body === 'object' && body !== null
+              ? (body as Record<string, unknown>)
+              : null;
           // If role mismatch, send user back to the sign-in page with details
-          if (body?.error === 'ROLE_MISMATCH') {
+          if (bodyObj && bodyObj['error'] === 'ROLE_MISMATCH') {
             // clear preferred role and redirect to sign-in with error details
             sessionStorage.removeItem('preferredRole');
             const expectedSlug =
-              body?.expectedSlug ??
-              String(body?.expected || '')
+              (bodyObj['expectedSlug'] as string | undefined) ??
+              String((bodyObj['expected'] as string | undefined) || '')
                 .toLowerCase()
                 .replace(/_/g, '-');
             window.location.href = `/login?error=role_mismatch&expected=${encodeURIComponent(
@@ -88,7 +92,7 @@ export default function LoginPage() {
             )}`;
             return;
           }
-          console.error('Failed to ensure app user', body);
+          console.error('Failed to ensure app user', bodyObj);
         }
       } catch (err) {
         console.error(err);

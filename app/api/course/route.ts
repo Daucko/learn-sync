@@ -6,7 +6,8 @@ export async function GET() {
   try {
     const items = await prisma.course.findMany();
     return ok(items);
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
     return err(e.message || 'Error fetching courses');
   }
 }
@@ -19,6 +20,11 @@ export async function POST(req: Request) {
     const created = await prisma.course.create({ data: parsed });
     return ok(created);
   } catch (e: any) {
-    return err(zodErrorMessage(e) || e.message || 'Error creating course', 422);
+    return err(
+      zodErrorMessage(e) ||
+        (e instanceof Error ? e.message : String(e)) ||
+        'Error creating course',
+      422
+    );
   }
 }

@@ -9,8 +9,9 @@ export async function GET() {
       include: { users: true, subjects: true },
     });
     return ok(items);
-  } catch (e: any) {
-    return err(e.message || 'Error fetching organizations');
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
+    return err(message || 'Error fetching organizations');
   }
 }
 
@@ -21,9 +22,10 @@ export async function POST(req: Request) {
     const parsed = OrganizationCreateSchema.parse(body);
     const created = await prisma.organization.create({ data: parsed });
     return ok(created);
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
     return err(
-      zodErrorMessage(e) || e.message || 'Error creating organization',
+      zodErrorMessage(e) || message || 'Error creating organization',
       422
     );
   }
