@@ -15,7 +15,8 @@ export async function POST(req: Request) {
 
     // fetch clerk user details to populate email/name
     const clerkUser = await clerkClient.users.getUser(userId);
-    const email = clerkUser.emailAddresses?.[0]?.emailAddress ?? null;
+    const email =
+      clerkUser.emailAddresses?.[0]?.emailAddress ?? `${userId}@clerk.local`;
     const fullName = clerkUser.fullName ?? null;
 
     // find or create the app user
@@ -27,7 +28,7 @@ export async function POST(req: Request) {
         data: {
           clerkId: userId,
           email,
-          name: fullName,
+          fullName,
           role: normalized as any,
         },
       });

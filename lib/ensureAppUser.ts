@@ -8,14 +8,16 @@ export async function ensureAppUser(clerkUserId: string) {
   if (existing) return existing;
 
   const u = await clerkClient.users.getUser(clerkUserId);
-  const email = u.emailAddresses?.[0]?.emailAddress ?? null;
-  const name = u.fullName ?? null;
+  // Ensure we don't pass nullable email to Prisma if the schema requires it.
+  const email =
+    u.emailAddresses?.[0]?.emailAddress ?? `${clerkUserId}@clerk.local`;
+  const fullName = u.fullName ?? null;
 
   return prisma.user.create({
     data: {
       clerkId: clerkUserId,
       email,
-      name,
+      fullName,
     },
   });
 }

@@ -6,7 +6,7 @@ import { useSignUp } from '@clerk/nextjs';
 
 declare global {
   interface Window {
-    clerk: any;
+    clerk?: unknown;
   }
 }
 
