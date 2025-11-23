@@ -1,42 +1,54 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-import { auth, clerkClient } from '@clerk/nextjs';
+import { prisma } from '@/lib/prisma';
+import { currentUser, clerkClient } from '@clerk/nextjs/server';
 
 export async function POST(req: Request) {
   try {
-    const { userId } = auth();
+    const current = await currentUser();
+    const userId = current?.id;
     if (!userId) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     const body = await req.json();
-    const role = body?.role ?? 'student';
+    const role = (body?.role as string) ?? 'student';
 
     // fetch clerk user details to populate email/name
     const clerkUser = await clerkClient.users.getUser(userId);
     const email = clerkUser.emailAddresses?.[0]?.emailAddress ?? null;
-    const name = clerkUser.fullName ?? null;
+    const fullName = clerkUser.fullName ?? null;
 
     // find or create the app user
     let user = await prisma.user.findUnique({ where: { clerkId: userId } });
+    const normalized = role.replace(/-/g, '_').toUpperCase();
     if (!user) {
+      // New user: create with chosen role
       user = await prisma.user.create({
         data: {
           clerkId: userId,
           email,
-          name,
-          role: role.toUpperCase(),
+          name: fullName,
+          role: normalized as any,
         },
       });
+      // Set Clerk public metadata role as slug (e.g. 'school-admin')
+      const slugRole = normalized.toLowerCase().replace(/_/g, '-');
+      await clerkClient.users.updateUser(userId, {
+        publicMetadata: { role: slugRole },
+      });
     } else {
-      // update role if provided and different
-      const normalized = role.toUpperCase();
+      // Existing user: do not allow role change during sign-in
       if (user.role !== normalized) {
-        user = await prisma.user.update({
-          where: { clerkId: userId },
-          data: { role: normalized },
-        });
+        return NextResponse.json(
+          { error: 'ROLE_MISMATCH', expected: user.role },
+          { status: 403 }
+        );
       }
+      // role matches — ensure Clerk metadata is present
+      const slugRole = normalized.toLowerCase().replace(/_/g, '-');
+      await clerkClient.users.updateUser(userId, {
+        publicMetadata: { role: slugRole },
+      });
     }
 
     return NextResponse.json({ user });

@@ -1,3 +1,4 @@
+// app/signup/admin/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -5,9 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BookOpen, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useSignUp } from '@clerk/nextjs';
 
 export default function SchoolAdminRegistration() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     // Organization Details
     organizationName: '',
@@ -21,16 +25,17 @@ export default function SchoolAdminRegistration() {
     adminPassword: '',
     adminPhone: '',
   });
-  const [registrationData, setRegistrationData] = useState(null);
+
+  const router = useRouter();
+  const { isLoaded, signUp } = useSignUp();
 
   useEffect(() => {
     // Retrieve the registration data from sessionStorage
     const storedData = sessionStorage.getItem('registrationData');
     if (storedData) {
       const parsed = JSON.parse(storedData);
-      setRegistrationData(parsed);
 
-      // Pre-fill admin fields from the initial registration
+      // Pre-fill admin fields from the initial registration if available
       setFormData((prev) => ({
         ...prev,
         adminName: parsed.fullName || '',
@@ -51,10 +56,76 @@ export default function SchoolAdminRegistration() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleAdminSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle registration logic here
-    console.log(formData);
+
+    if (!isLoaded) {
+      console.error('Clerk not loaded');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Create the school admin account with Clerk
+      await signUp.create({
+        emailAddress: formData.adminEmail,
+        password: formData.adminPassword,
+        firstName: formData.adminName.split(' ')[0],
+        lastName: formData.adminName.split(' ').slice(1).join(' ') || '',
+        unsafeMetadata: {
+          role: 'school-admin',
+          organizationName: formData.organizationName,
+          organizationEmail: formData.organizationEmail,
+          organizationPhone: formData.organizationPhone,
+          organizationAddress: formData.organizationAddress,
+          adminPhone: formData.adminPhone,
+          registrationCompleted: false,
+          accountStatus: 'active', // School admins are typically active immediately
+        },
+      });
+
+      // Prepare email verification
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+
+      // Store registration data for verification page
+      sessionStorage.setItem(
+        'pendingVerification',
+        JSON.stringify({
+          email: formData.adminEmail,
+          role: 'school-admin',
+          fullName: formData.adminName,
+          organizationName: formData.organizationName,
+        })
+      );
+
+      // Redirect to verification page
+      router.push('/verify-email');
+    } catch (err: any) {
+      console.error('Error during school admin sign-up:', err);
+
+      // Enhanced error handling
+      if (err.errors) {
+        const error = err.errors[0];
+        if (error.code === 'form_identifier_exists') {
+          alert(
+            'An account with this email already exists. Please log in instead.'
+          );
+        } else if (error.code === 'form_password_length_too_short') {
+          alert('Password must be at least 8 characters long.');
+        } else if (error.code === 'form_password_pwned') {
+          alert(
+            'This password has been compromised. Please choose a different password.'
+          );
+        } else {
+          alert(`Error: ${error.longMessage || error.message}`);
+        }
+      } else {
+        alert('An unexpected error occurred. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -80,9 +151,15 @@ export default function SchoolAdminRegistration() {
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
                   Create Your Administrator Account
                 </h1>
+                <p className="text-text-secondary dark:text-gray-400">
+                  Set up your institution and administrator profile
+                </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+              <form
+                onSubmit={handleAdminSubmit}
+                className="flex flex-col gap-8"
+              >
                 {/* Organization Details Section */}
                 <div className="flex flex-col gap-6">
                   <h3 className="text-xl font-bold leading-tight tracking-tight">
@@ -104,6 +181,7 @@ export default function SchoolAdminRegistration() {
                         placeholder="Enter your school's name"
                         className="h-12 text-base"
                         required
+                        disabled={isLoading}
                       />
                     </div>
 
@@ -123,6 +201,7 @@ export default function SchoolAdminRegistration() {
                         placeholder="Enter your school's email"
                         className="h-12 text-base"
                         required
+                        disabled={isLoading}
                       />
                     </div>
 
@@ -142,6 +221,7 @@ export default function SchoolAdminRegistration() {
                         placeholder="(123) 456-7890"
                         className="h-12 text-base"
                         required
+                        disabled={isLoading}
                       />
                     </div>
 
@@ -160,6 +240,7 @@ export default function SchoolAdminRegistration() {
                         placeholder="123 Education Lane"
                         className="h-12 text-base"
                         required
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
@@ -186,6 +267,7 @@ export default function SchoolAdminRegistration() {
                         placeholder="e.g. Jane Doe"
                         className="h-12 text-base"
                         required
+                        disabled={isLoading}
                       />
                     </div>
 
@@ -205,6 +287,7 @@ export default function SchoolAdminRegistration() {
                         placeholder="Enter your work email"
                         className="h-12 text-base"
                         required
+                        disabled={isLoading}
                       />
                     </div>
 
@@ -225,11 +308,14 @@ export default function SchoolAdminRegistration() {
                           placeholder="Enter a strong password"
                           className="h-12 text-base pr-12"
                           required
+                          disabled={isLoading}
+                          minLength={8}
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                          disabled={isLoading}
                         >
                           {showPassword ? (
                             <EyeOff size={20} />
@@ -238,7 +324,7 @@ export default function SchoolAdminRegistration() {
                           )}
                         </button>
                       </div>
-                      <p className="text-error text-sm font-normal pt-1.5">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 pt-1.5">
                         Password must be at least 8 characters.
                       </p>
                     </div>
@@ -259,6 +345,7 @@ export default function SchoolAdminRegistration() {
                         placeholder="Your direct phone number"
                         className="h-12 text-base"
                         required
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
@@ -268,12 +355,17 @@ export default function SchoolAdminRegistration() {
                 <div className="flex flex-col items-center gap-4 pt-4">
                   <Button
                     type="submit"
-                    className="min-w-40 h-12 rounded-full bg-primary hover:bg-primary/90 w-full text-base font-bold"
-                    asChild
+                    disabled={!isLoaded || isLoading}
+                    className="min-w-40 h-12 rounded-full bg-primary hover:bg-primary/90 w-full text-base font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Link href="/signup/admin/email-verification">
-                      Create Account
-                    </Link>
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                        Creating account...
+                      </div>
+                    ) : (
+                      'Create Account'
+                    )}
                   </Button>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Already have an account?{' '}

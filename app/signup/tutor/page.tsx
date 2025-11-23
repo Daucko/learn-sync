@@ -1,3 +1,4 @@
+// app/signup/tutor/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -6,10 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { BookOpen, Search, Upload, Play } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useSignUp } from '@clerk/nextjs';
 
 export default function TutorRegistration() {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedOrganization, setSelectedOrganization] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     // Step 1
     organizationSearch: '',
@@ -23,6 +27,9 @@ export default function TutorRegistration() {
     bio: '',
     cv: null as File | null,
   });
+
+  const router = useRouter();
+  const { isLoaded, signUp } = useSignUp();
 
   const organizations = [
     {
@@ -73,10 +80,76 @@ export default function TutorRegistration() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleTutorSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle tutor registration logic here
-    console.log({ organization: selectedOrganization, ...formData });
+
+    if (!isLoaded) {
+      console.error('Clerk not loaded');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Create the tutor account with Clerk
+      await signUp.create({
+        emailAddress: formData.email,
+        password: formData.password,
+        firstName: formData.fullName.split(' ')[0],
+        lastName: formData.fullName.split(' ').slice(1).join(' ') || '',
+        unsafeMetadata: {
+          role: 'tutor',
+          organization: selectedOrganization,
+          specialization: formData.specialization,
+          bio: formData.bio,
+          phone: formData.phone,
+          registrationCompleted: false,
+          approvalStatus: 'pending', // Tutors need approval
+        },
+      });
+
+      // Prepare email verification
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+
+      // Store registration data for verification page
+      sessionStorage.setItem(
+        'pendingVerification',
+        JSON.stringify({
+          email: formData.email,
+          role: 'tutor',
+          fullName: formData.fullName,
+          organization: selectedOrganization,
+          specialization: formData.specialization,
+        })
+      );
+
+      // Redirect to verification page
+      router.push('/verify-email');
+    } catch (err: any) {
+      console.error('Error during tutor sign-up:', err);
+
+      // Enhanced error handling
+      if (err.errors) {
+        const error = err.errors[0];
+        if (error.code === 'form_identifier_exists') {
+          alert(
+            'An account with this email already exists. Please log in instead.'
+          );
+        } else if (error.code === 'form_password_length_too_short') {
+          alert('Password must be at least 8 characters long.');
+        } else if (error.code === 'form_password_pwned') {
+          alert(
+            'This password has been compromised. Please choose a different password.'
+          );
+        } else {
+          alert(`Error: ${error.longMessage || error.message}`);
+        }
+      } else {
+        alert('An unexpected error occurred. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -128,7 +201,7 @@ export default function TutorRegistration() {
               <div className="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700">
                 <div
                   className="bg-secondary h-1.5 rounded-full"
-                  style={{ width: '100%' }}
+                  style={{ width: '50%' }}
                 ></div>
               </div>
 
@@ -165,7 +238,7 @@ export default function TutorRegistration() {
                     }`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="bg-gray-100 dark:bg-gray-700 rounded-lg size-12 flex-shrink-0"></div>
+                      <div className="bg-gray-100 dark:bg-gray-700 rounded-lg size-12 shrink-0"></div>
                       <div className="flex flex-col justify-center">
                         <p className="font-semibold text-text-primary dark:text-background-light">
                           {org.name}
@@ -191,7 +264,7 @@ export default function TutorRegistration() {
               <Button
                 onClick={handleStep1Continue}
                 disabled={!selectedOrganization}
-                className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 cursor-pointer"
+                className="w-full h-12 text-base font-semibold bg-primary hover:bg-primary/90 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue
               </Button>
@@ -223,7 +296,7 @@ export default function TutorRegistration() {
               </div>
 
               {/* Form Fields */}
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleTutorSubmit} className="space-y-6">
                 <div>
                   <label
                     htmlFor="fullName"
@@ -241,6 +314,7 @@ export default function TutorRegistration() {
                       value={formData.fullName}
                       onChange={handleInputChange}
                       className="h-11"
+                      disabled={isLoading}
                     />
                   </div>
                 </div>
@@ -263,6 +337,7 @@ export default function TutorRegistration() {
                         value={formData.email}
                         onChange={handleInputChange}
                         className="h-11"
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
@@ -284,6 +359,7 @@ export default function TutorRegistration() {
                         value={formData.phone}
                         onChange={handleInputChange}
                         className="h-11"
+                        disabled={isLoading}
                       />
                     </div>
                   </div>
@@ -306,8 +382,13 @@ export default function TutorRegistration() {
                       value={formData.password}
                       onChange={handleInputChange}
                       className="h-11"
+                      disabled={isLoading}
+                      minLength={8}
                     />
                   </div>
+                  <p className="mt-1 text-xs text-text-secondary dark:text-gray-400">
+                    Password must be at least 8 characters long
+                  </p>
                 </div>
 
                 <div>
@@ -325,6 +406,7 @@ export default function TutorRegistration() {
                       onChange={handleInputChange}
                       placeholder="e.g. Mathematics, Physics, History"
                       className="h-11"
+                      disabled={isLoading}
                     />
                   </div>
                   <p className="mt-1 text-xs text-text-secondary dark:text-gray-400">
@@ -347,6 +429,8 @@ export default function TutorRegistration() {
                       onChange={handleInputChange}
                       rows={4}
                       className="resize-none"
+                      disabled={isLoading}
+                      placeholder="Tell us about your teaching experience, qualifications, and background..."
                     />
                   </div>
                 </div>
@@ -371,6 +455,7 @@ export default function TutorRegistration() {
                             onChange={handleFileChange}
                             className="sr-only"
                             accept=".pdf,.doc,.docx"
+                            disabled={isLoading}
                           />
                         </label>
                         <p className="pl-1">or drag and drop</p>
@@ -385,12 +470,17 @@ export default function TutorRegistration() {
                 <div>
                   <Button
                     type="submit"
-                    className="w-full h-12 text-sm font-semibold bg-primary hover:bg-primary/90 cursor-pointer"
-                    asChild
+                    disabled={!isLoaded || isLoading}
+                    className="w-full h-12 text-sm font-semibold bg-primary hover:bg-primary/90 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Link href="/signup/tutor/pending-approval">
-                      Create Account
-                    </Link>
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                        Creating account...
+                      </div>
+                    ) : (
+                      'Create Account'
+                    )}
                   </Button>
                 </div>
               </form>

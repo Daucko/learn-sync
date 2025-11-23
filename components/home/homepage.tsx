@@ -11,20 +11,27 @@ import {
   Star,
   ArrowRight,
   Menu,
+  Clock,
+  Sparkles,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import Footer from './footer';
 import Link from 'next/link';
 import Header from './header';
+import ComingSoonButton from './coming-soon-button';
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-linear-to-b from-emerald-50 to-white dark:from-gray-900 dark:to-gray-950">
       {/* Navigation */}
+
       <Header />
+      <div className="flex justify-center mt-8">
+        <ComingSoonButton />
+      </div>
 
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-28">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-20">
         <div className="text-center max-w-4xl mx-auto">
           <Card className="inline-flex items-center gap-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-4 py-2 rounded-full border-0 shadow-none mb-6">
             <CardContent className="p-0 flex items-center gap-2">

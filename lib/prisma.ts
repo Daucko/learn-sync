@@ -1,12 +1,20 @@
 import { PrismaClient } from '@prisma/client'
+import { withAccelerate } from '@prisma/extension-accelerate'
 
-declare global {
-  // eslint-disable-next-line no-var
-  var __prisma?: PrismaClient
+// Prevent multiple instances of Prisma Client in development with HMR
+const globalForPrisma = globalThis as unknown as {
+  prisma: ReturnType<PrismaClient['$extends']> | PrismaClient | undefined
 }
 
-const prisma = global.__prisma ?? new PrismaClient()
+function createClient() {
+  const base = new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error']
+  })
+  return base.$extends(withAccelerate())
+}
 
-if (process.env.NODE_ENV !== 'production') global.__prisma = prisma
+export const prisma = (globalForPrisma.prisma as any) ?? createClient()
+
+if (process.env.NODE_ENV !== 'production') (globalForPrisma as any).prisma = prisma
 
 export default prisma

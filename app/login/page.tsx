@@ -53,15 +53,31 @@ export default function LoginPage() {
           const data = await res.json();
           // redirect to role dashboard
           const role = data.user?.role || preferredRole;
-          const mapping = {
+          const mapping: Record<string, string> = {
             student: '/dashboards/student',
             tutor: '/dashboards/tutor',
             'school-admin': '/dashboards/school-admin',
             'super-admin': '/dashboards/super-admin',
           };
-          window.location.href = mapping[role] ?? '/';
+          // Normalize role coming from server: e.g. 'STUDENT' or 'SCHOOL_ADMIN'
+          const normalizedRole = String(role).toLowerCase().replace(/_/g, '-');
+          window.location.href = mapping[normalizedRole] ?? '/';
         } else {
-          console.error('Failed to ensure app user');
+          // try to get detailed error
+          let body: any = null;
+          try {
+            body = await res.json();
+          } catch (_) {
+            /* ignore */
+          }
+          // If role mismatch, send user back to the sign-in page
+          if (body?.error === 'ROLE_MISMATCH') {
+            // clear preferred role and redirect to sign-in
+            sessionStorage.removeItem('preferredRole');
+            window.location.href = '/login';
+            return;
+          }
+          console.error('Failed to ensure app user', body);
         }
       } catch (err) {
         console.error(err);

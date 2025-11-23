@@ -14,6 +14,7 @@ import {
   LibraryBig,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import LogoutButton from '@/components/auth/LogoutButton';
 
 interface NavigationItem {
   name: string;
@@ -87,10 +88,10 @@ export function Sidebar({ navigation = defaultNavigation }: SidebarProps) {
               Settings
             </Link>
 
-            <button className="flex items-center gap-3 rounded-lg px-4 py-2.5 text-gray-600 hover:bg-gray-100 text-sm font-medium">
+            <LogoutButton className="flex items-center gap-3 rounded-lg px-4 py-2.5 text-gray-600 hover:bg-gray-100 text-sm font-medium">
               <LogOut className="h-5 w-5" />
               Log out
-            </button>
+            </LogoutButton>
           </div>
         </div>
       </div>
