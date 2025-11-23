@@ -39,8 +39,9 @@ export async function POST(req: Request) {
     } else {
       // Existing user: do not allow role change during sign-in
       if (user.role !== normalized) {
+        const expectedSlug = String(user.role).toLowerCase().replace(/_/g, '-');
         return NextResponse.json(
-          { error: 'ROLE_MISMATCH', expected: user.role },
+          { error: 'ROLE_MISMATCH', expected: user.role, expectedSlug },
           { status: 403 }
         );
       }

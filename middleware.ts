@@ -1,9 +1,13 @@
 // middleware.js
-import { clerkMiddleware, createRouteMatcher, clerkClient } from '@clerk/nextjs/server';
+import {
+  clerkMiddleware,
+  createRouteMatcher,
+  clerkClient,
+} from '@clerk/nextjs/server';
 
 // Create route matchers
 const isPublicRoute = createRouteMatcher([
-  '/',
+  // Don't include root `/` here — allow signed-in users to view homepage
   '/signup',
   '/login',
   '/verify-email',
@@ -35,10 +39,13 @@ export default clerkMiddleware(async (auth, req) => {
         (user.unsafeMetadata?.role as string | undefined);
 
       const target =
-        role === 'tutor' ? '/tutor' :
-        role === 'school-admin' ? '/school-admin' :
-        role === 'super-admin' ? '/super-admin' :
-        '/student';
+        role === 'tutor'
+          ? '/tutor'
+          : role === 'school-admin'
+          ? '/school-admin'
+          : role === 'super-admin'
+          ? '/super-admin'
+          : '/student';
 
       return Response.redirect(new URL(target, req.url));
     } catch {

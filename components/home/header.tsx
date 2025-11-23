@@ -48,16 +48,19 @@ export default function Header() {
         </div>
 
         {/* Desktop Header Actions - Hidden on mobile */}
-        <div className="hidden sm:flex items-center gap-3">
+        <div className="hidden sm:flex items-center gap-3 ">
           <ThemeToggle />
           <Button
             variant="ghost"
-            className="text-gray-600 dark:text-gray-300"
+            className="text-gray-600 dark:text-gray-300 pointer-events-none"
             asChild
           >
             <Link href="/login">Sign In</Link>
           </Button>
-          <Button className="bg-primary hover:bg-primary/80" asChild>
+          <Button
+            className="bg-primary hover:bg-primary/80 pointer-events-none"
+            asChild
+          >
             <Link href="/signup">Get Started</Link>
           </Button>
         </div>
