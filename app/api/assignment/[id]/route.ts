@@ -1,14 +1,17 @@
+// app/api/assignment/[id]/route.ts
 import { prisma } from '@/lib/prisma';
 import { requireAuth, ok, err } from '@/lib/api';
 import { AssignmentUpdateSchema, zodErrorMessage } from '@/lib/validators';
+import { NextRequest } from 'next/server';
 
 export async function GET(
-  _req: Request,
-  { params }: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params; // Await the params
     const item = await prisma.assignment.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
     if (!item) return err('Not found', 404);
     return ok(item);
@@ -19,15 +22,16 @@ export async function GET(
 }
 
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth();
+    const { id } = await params; // Await the params
     const body = await req.json();
     const parsed = AssignmentUpdateSchema.parse(body);
     const updated = await prisma.assignment.update({
-      where: { id: params.id },
+      where: { id },
       data: parsed,
     });
     return ok(updated);
@@ -41,13 +45,14 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _req: Request,
-  { params }: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth();
-    await prisma.assignment.delete({ where: { id: params.id } });
-    return ok({ id: params.id });
+    const { id } = await params; // Await the params
+    await prisma.assignment.delete({ where: { id } });
+    return ok({ id });
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
     return err(message || 'Error deleting assignment');

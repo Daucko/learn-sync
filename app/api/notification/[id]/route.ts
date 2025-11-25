@@ -1,15 +1,15 @@
 import { prisma } from '@/lib/prisma';
 import { requireAuth, ok, err } from '@/lib/api';
 import { NotificationUpdateSchema, zodErrorMessage } from '@/lib/validators';
+import { NextRequest } from 'next/server';
 
 export async function GET(
-  _req: Request,
-  { params }: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const item = await prisma.notification.findUnique({
-      where: { id: params.id },
-    });
+    const { id } = await params;
+    const item = await prisma.notification.findUnique({ where: { id } });
     if (!item) return err('Not found', 404);
     return ok(item);
   } catch (e: unknown) {
@@ -19,15 +19,16 @@ export async function GET(
 }
 
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth();
+    const { id } = await params;
     const body = await req.json();
     const parsed = NotificationUpdateSchema.parse(body);
     const updated = await prisma.notification.update({
-      where: { id: params.id },
+      where: { id },
       data: parsed,
     });
     return ok(updated);
@@ -41,13 +42,14 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _req: Request,
-  { params }: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth();
-    await prisma.notification.delete({ where: { id: params.id } });
-    return ok({ id: params.id });
+    const { id } = await params;
+    await prisma.notification.delete({ where: { id } });
+    return ok({ id });
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
     return err(message || 'Error deleting notification');

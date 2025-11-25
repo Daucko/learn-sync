@@ -1,15 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, ok, err } from '@/lib/api';
 import { OrganizationUpdateSchema, zodErrorMessage } from '@/lib/validators';
 
 export async function GET(
-  _req: Request,
-  { params }: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const item = await prisma.organization.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: { users: true, subjects: true },
     });
     if (!item) return err('Not found', 404);
@@ -21,15 +22,16 @@ export async function GET(
 }
 
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth();
+    const { id } = await params;
     const body = await req.json();
     const parsed = OrganizationUpdateSchema.parse(body);
     const updated = await prisma.organization.update({
-      where: { id: params.id },
+      where: { id },
       data: parsed,
     });
     return ok(updated);
@@ -43,13 +45,14 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _req: Request,
-  { params }: { params: { id: string } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth();
-    await prisma.organization.delete({ where: { id: params.id } });
-    return ok({ id: params.id });
+    const { id } = await params;
+    await prisma.organization.delete({ where: { id } });
+    return ok({ id });
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
     return err(message || 'Error deleting organization');
