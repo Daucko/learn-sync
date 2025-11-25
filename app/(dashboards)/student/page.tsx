@@ -202,6 +202,7 @@ import {
   Library,
   GraduationCap,
 } from 'lucide-react';
+import { RoleGuard } from '../../../components/auth/RoleGuard';
 
 export default function StudentDashboard() {
   const enrolledSubjects = [
@@ -276,182 +277,186 @@ export default function StudentDashboard() {
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-        <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Welcome back, Olivia!</p>
-        </div>
+    <RoleGuard allowedRoles={['student']}>
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+          <div>
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <p className="text-muted-foreground mt-1">Welcome back, Olivia!</p>
+          </div>
 
-        {/* Current Session Info */}
-        <Card className="w-full lg:w-auto">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Current Session</p>
-                <p className="font-bold text-lg">Fall 2024</p>
-              </div>
-              <div className="w-px h-10 bg-border" />
-              <div>
-                <p className="text-sm text-muted-foreground">Term Dates</p>
-                <p className="font-bold text-lg">Sep 1 - Dec 15</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Content - 2/3 width */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Enrolled Subjects */}
-          <section>
-            <h2 className="text-xl font-bold mb-4">Enrolled Subjects</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {enrolledSubjects.map((subject, index) => (
-                <Card
-                  key={index}
-                  className="overflow-hidden hover:shadow-lg transition-shadow"
-                >
-                  <div
-                    className="w-full h-32 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${subject.image})` }}
-                  />
-                  <CardContent className="p-5">
-                    <h3 className="text-lg font-bold">{subject.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {subject.code} - {subject.instructor}
-                    </p>
-
-                    <div className="mt-4 space-y-2">
-                      <Progress value={subject.progress} className="h-2" />
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm text-muted-foreground">
-                          Progress
-                        </p>
-                        <p className="text-sm font-semibold">
-                          {subject.progress}%
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
-
-          {/* Upcoming Assignments */}
-          <section>
-            <h2 className="text-xl font-bold mb-4">Upcoming Assignments</h2>
-            <div className="space-y-4">
-              {assignments.map((assignment, index) => (
-                <Card key={index}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <div
-                        className={`p-3 rounded-lg ${
-                          assignment.status === 'completed'
-                            ? 'bg-green-100 dark:bg-green-900/20 text-green-600'
-                            : 'bg-orange-100 dark:bg-orange-900/20 text-orange-600'
-                        }`}
-                      >
-                        <GraduationCap className="w-5 h-5" />
-                      </div>
-
-                      <div className="grow">
-                        <p className="font-bold">{assignment.title}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {assignment.course} - {assignment.dueDate}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        {assignment.graded ? (
-                          <Button className="bg-green-600 hover:bg-green-700">
-                            <Eye className="w-4 h-4 mr-2" />
-                            View Grade
-                          </Button>
-                        ) : (
-                          <>
-                            <Button variant="outline">
-                              <Download className="w-4 h-4 mr-2" />
-                              Download
-                            </Button>
-                            <Button className="bg-orange-500 hover:bg-orange-600">
-                              <Upload className="w-4 h-4 mr-2" />
-                              Upload
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
-        </div>
-
-        {/* Sidebar - 1/3 width */}
-        <div className="space-y-8">
-          {/* Notifications */}
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-xl">Notifications</CardTitle>
-                <div className="relative">
-                  <Bell className="w-5 h-5 text-muted-foreground" />
-                  <Badge className="absolute -top-2 -right-2 h-4 w-4 flex items-center justify-center p-0 text-xs">
-                    2
-                  </Badge>
+          {/* Current Session Info */}
+          <Card className="w-full lg:w-auto">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    Current Session
+                  </p>
+                  <p className="font-bold text-lg">Fall 2024</p>
+                </div>
+                <div className="w-px h-10 bg-border" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Term Dates</p>
+                  <p className="font-bold text-lg">Sep 1 - Dec 15</p>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {notifications.map((notification, index) => (
-                <div
-                  key={index}
-                  className={`flex items-start gap-4 ${
-                    notification.muted ? 'opacity-60' : ''
-                  }`}
-                >
-                  <div
-                    className={`p-2.5 rounded-lg mt-0.5 ${notification.bgColor}`}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content - 2/3 width */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Enrolled Subjects */}
+            <section>
+              <h2 className="text-xl font-bold mb-4">Enrolled Subjects</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {enrolledSubjects.map((subject, index) => (
+                  <Card
+                    key={index}
+                    className="overflow-hidden hover:shadow-lg transition-shadow"
                   >
-                    <notification.icon
-                      className={`w-4 h-4 ${notification.iconColor}`}
+                    <div
+                      className="w-full h-32 bg-cover bg-center"
+                      style={{ backgroundImage: `url(${subject.image})` }}
                     />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-sm">
-                      {notification.title}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {notification.message}
-                    </p>
+                    <CardContent className="p-5">
+                      <h3 className="text-lg font-bold">{subject.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {subject.code} - {subject.instructor}
+                      </p>
+
+                      <div className="mt-4 space-y-2">
+                        <Progress value={subject.progress} className="h-2" />
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm text-muted-foreground">
+                            Progress
+                          </p>
+                          <p className="text-sm font-semibold">
+                            {subject.progress}%
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+
+            {/* Upcoming Assignments */}
+            <section>
+              <h2 className="text-xl font-bold mb-4">Upcoming Assignments</h2>
+              <div className="space-y-4">
+                {assignments.map((assignment, index) => (
+                  <Card key={index}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-4">
+                        <div
+                          className={`p-3 rounded-lg ${
+                            assignment.status === 'completed'
+                              ? 'bg-green-100 dark:bg-green-900/20 text-green-600'
+                              : 'bg-orange-100 dark:bg-orange-900/20 text-orange-600'
+                          }`}
+                        >
+                          <GraduationCap className="w-5 h-5" />
+                        </div>
+
+                        <div className="grow">
+                          <p className="font-bold">{assignment.title}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {assignment.course} - {assignment.dueDate}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          {assignment.graded ? (
+                            <Button className="bg-green-600 hover:bg-green-700">
+                              <Eye className="w-4 h-4 mr-2" />
+                              View Grade
+                            </Button>
+                          ) : (
+                            <>
+                              <Button variant="outline">
+                                <Download className="w-4 h-4 mr-2" />
+                                Download
+                              </Button>
+                              <Button className="bg-orange-500 hover:bg-orange-600">
+                                <Upload className="w-4 h-4 mr-2" />
+                                Upload
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </section>
+          </div>
+
+          {/* Sidebar - 1/3 width */}
+          <div className="space-y-8">
+            {/* Notifications */}
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-xl">Notifications</CardTitle>
+                  <div className="relative">
+                    <Bell className="w-5 h-5 text-muted-foreground" />
+                    <Badge className="absolute -top-2 -right-2 h-4 w-4 flex items-center justify-center p-0 text-xs">
+                      2
+                    </Badge>
                   </div>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {notifications.map((notification, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-start gap-4 ${
+                      notification.muted ? 'opacity-60' : ''
+                    }`}
+                  >
+                    <div
+                      className={`p-2.5 rounded-lg mt-0.5 ${notification.bgColor}`}
+                    >
+                      <notification.icon
+                        className={`w-4 h-4 ${notification.iconColor}`}
+                      />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">
+                        {notification.title}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {notification.message}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
 
-          {/* Resources Card */}
-          <Card className="bg-linear-to-br from-green-500 to-green-700 text-white">
-            <CardContent className="p-6 text-center">
-              <Library className="w-12 h-12 mx-auto mb-3" />
-              <h3 className="text-lg font-bold mb-2">Access Resources</h3>
-              <p className="text-sm opacity-80 mb-4">
-                Watch video tutorials and animated instructions for your
-                courses.
-              </p>
-              <Button className="w-full bg-orange-500 hover:bg-orange-600">
-                Browse Videos
-              </Button>
-            </CardContent>
-          </Card>
+            {/* Resources Card */}
+            <Card className="bg-linear-to-br from-green-500 to-green-700 text-white">
+              <CardContent className="p-6 text-center">
+                <Library className="w-12 h-12 mx-auto mb-3" />
+                <h3 className="text-lg font-bold mb-2">Access Resources</h3>
+                <p className="text-sm opacity-80 mb-4">
+                  Watch video tutorials and animated instructions for your
+                  courses.
+                </p>
+                <Button className="w-full bg-orange-500 hover:bg-orange-600">
+                  Browse Videos
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </RoleGuard>
   );
 }

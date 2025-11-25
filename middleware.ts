@@ -1,5 +1,6 @@
 // middleware.ts
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
 // Create route matchers
 const isPublicRoute = createRouteMatcher([
@@ -7,14 +8,26 @@ const isPublicRoute = createRouteMatcher([
   '/login(.*)',
   '/verify-email(.*)',
   '/api/webhook/clerk(.*)',
+  '/unauthorized',
 ]);
 
 const isProtectedRoute = createRouteMatcher([
   '/student(.*)',
   '/tutor(.*)',
   '/school-admin(.*)',
+  '/super-admin(.*)',
+  '/dashboard(.*)',
   '/api/protected(.*)',
 ]);
+
+// Role-based route matchers
+const isStudentRoute = createRouteMatcher(['/student(.*)']);
+const isTutorRoute = createRouteMatcher(['/tutor(.*)']);
+const isSchoolAdminRoute = createRouteMatcher([
+  '/school-admin(.*)',
+  '/dashboard(.*)',
+]);
+const isSuperAdminRoute = createRouteMatcher(['/super-admin(.*)']);
 
 export default clerkMiddleware(async (auth, req) => {
   const { userId, redirectToSignIn } = await auth();
@@ -24,11 +37,15 @@ export default clerkMiddleware(async (auth, req) => {
     return redirectToSignIn({ returnBackUrl: req.url });
   }
 
-  // If the user is signed in and on a public route, redirect to student dashboard
-  // We can't fetch user data in middleware, so redirect to a default location
+  // If the user is signed in and on a public route, redirect based on role
   if (userId && isPublicRoute(req)) {
-    return Response.redirect(new URL('/student/dashboard', req.url));
+    // We can't access user metadata in middleware, so redirect to a role detection page
+    // or the default student dashboard
+    return Response.redirect(new URL('/detect-role', req.url));
   }
+
+  // For protected routes, we'll handle role-based access in the client components
+  // since middleware doesn't have easy access to user metadata
 });
 
 export const config = {
