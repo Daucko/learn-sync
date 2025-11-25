@@ -1,61 +1,57 @@
+// app/api/content-uploads/[id]/route.ts
 import { prisma } from '@/lib/prisma';
 import { requireAuth, ok, err } from '@/lib/api';
-import { AssignmentUpdateSchema, zodErrorMessage } from '@/lib/validators';
-import { ZodError } from 'zod';
+import { ContentUploadUpdateSchema, zodErrorMessage } from '@/lib/validators';
+import { NextRequest } from 'next/server';
 
 export async function GET(
-  _req: Request,
+  _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
-    const item = await prisma.assignment.findUnique({
+    const item = await prisma.contentUpload.findUnique({
       where: { id },
     });
     if (!item) return err('Not found', 404);
     return ok(item);
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
-    return err(message || 'Error fetching assignment');
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
+    return err(message || 'Error fetching upload');
   }
 }
 
 export async function PUT(
-  req: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth();
     const { id } = await params;
     const body = await req.json();
-    const parsed = AssignmentUpdateSchema.parse(body);
-    const updated = await prisma.assignment.update({
+    const parsed = ContentUploadUpdateSchema.parse(body);
+    const updated = await prisma.contentUpload.update({
       where: { id },
       data: parsed,
     });
     return ok(updated);
-  } catch (error: unknown) {
-    // Handle Zod validation errors
-    if (error instanceof ZodError) {
-      return err(zodErrorMessage(error) || 'Validation error', 422);
-    }
-
-    const message = error instanceof Error ? error.message : String(error);
-    return err(message || 'Error updating assignment', 422);
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
+    return err(zodErrorMessage(e) || message || 'Error updating upload', 422);
   }
 }
 
 export async function DELETE(
-  _req: Request,
+  _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth();
     const { id } = await params;
-    await prisma.assignment.delete({ where: { id } });
+    await prisma.contentUpload.delete({ where: { id } });
     return ok({ id });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
-    return err(message || 'Error deleting assignment');
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
+    return err(message || 'Error deleting upload');
   }
 }
