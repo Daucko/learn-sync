@@ -1,17 +1,12 @@
-// middleware.js
-import {
-  clerkMiddleware,
-  createRouteMatcher,
-  clerkClient,
-} from '@clerk/nextjs/server';
+// middleware.ts
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
 // Create route matchers
 const isPublicRoute = createRouteMatcher([
-  // Don't include root `/` here — allow signed-in users to view homepage
-  '/signup',
-  '/login',
-  '/verify-email',
-  '/api/webhook/clerk',
+  '/signup(.*)',
+  '/login(.*)',
+  '/verify-email(.*)',
+  '/api/webhook/clerk(.*)',
 ]);
 
 const isProtectedRoute = createRouteMatcher([
@@ -29,29 +24,10 @@ export default clerkMiddleware(async (auth, req) => {
     return redirectToSignIn({ returnBackUrl: req.url });
   }
 
-  // If the user is signed in and on a public route, redirect to their role dashboard
+  // If the user is signed in and on a public route, redirect to student dashboard
+  // We can't fetch user data in middleware, so redirect to a default location
   if (userId && isPublicRoute(req)) {
-    try {
-      const user = await clerkClient.users.getUser(userId);
-      const role =
-        (user.publicMetadata?.role as string | undefined) ||
-        (user.privateMetadata?.role as string | undefined) ||
-        (user.unsafeMetadata?.role as string | undefined);
-
-      const target =
-        role === 'tutor'
-          ? '/tutor'
-          : role === 'school-admin'
-          ? '/school-admin'
-          : role === 'super-admin'
-          ? '/super-admin'
-          : '/student';
-
-      return Response.redirect(new URL(target, req.url));
-    } catch {
-      // Fallback if user fetch fails
-      return Response.redirect(new URL('/student', req.url));
-    }
+    return Response.redirect(new URL('/student/dashboard', req.url));
   }
 });
 
