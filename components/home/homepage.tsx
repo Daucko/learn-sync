@@ -31,7 +31,7 @@ export default function HomePage() {
       </div>
 
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-20">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-20">
         <div className="text-center max-w-4xl mx-auto">
           <Card className="inline-flex items-center gap-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-4 py-2 rounded-full border-0 shadow-none mb-6">
             <CardContent className="p-0 flex items-center gap-2">

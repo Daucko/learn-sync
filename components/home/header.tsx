@@ -9,14 +9,8 @@ import Image from 'next/image';
 export default function Header() {
   return (
     <nav className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* <div className="flex items-center gap-2">
-          <GraduationCap className="h-8 w-8 text-emerald-600" />
-          <span className="text-2xl font-bold text-gray-900 dark:text-white">
-            LearnSync
-          </span>
-        </div> */}
-
+      <div className="max-w-7xl mx-auto px-6 py-1 flex items-center justify-between">
+        {/* Logo */}
         <Image
           src={LearnSync}
           alt="LearnSync Logo"
