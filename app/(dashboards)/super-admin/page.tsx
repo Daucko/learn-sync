@@ -2,11 +2,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TrendingUp, PlusCircle, Activity } from 'lucide-react';
-import { RoleGuard } from '../../../components/auth/RoleGuard';
 
 export default function SuperAdminDashboard() {
   return (
-    <RoleGuard allowedRoles={['super-admin']}>
+    <>
       <div className="p-8">
         <div className="flex flex-col max-w-7xl mx-auto">
           {/* Page Heading */}
@@ -176,6 +175,6 @@ export default function SuperAdminDashboard() {
           </Card>
         </div>
       </div>
-    </RoleGuard>
+    </>
   );
 }

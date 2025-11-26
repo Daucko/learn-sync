@@ -26,7 +26,6 @@ import {
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { AddSubjectDialog } from '@/components/dashboard/school-admin/AddSubjectDialog';
-import { RoleGuard } from '../../../components/auth/RoleGuard';
 
 // Types
 interface TooltipProps {
@@ -157,7 +156,7 @@ export default function Dashboard() {
   };
 
   return (
-    <RoleGuard allowedRoles={['school-admin']}>
+    <>
       <div className="p-8 space-y-8">
         {/* Header */}
         <div className="flex flex-wrap justify-between items-center gap-4">
@@ -296,6 +295,6 @@ export default function Dashboard() {
           onOpenChange={setIsAddSubjectDialogOpen}
         />
       </div>
-    </RoleGuard>
+    </>
   );
 }

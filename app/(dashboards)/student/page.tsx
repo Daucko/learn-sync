@@ -202,7 +202,6 @@ import {
   Library,
   GraduationCap,
 } from 'lucide-react';
-import { RoleGuard } from '../../../components/auth/RoleGuard';
 
 export default function StudentDashboard() {
   const enrolledSubjects = [
@@ -277,7 +276,7 @@ export default function StudentDashboard() {
   ];
 
   return (
-    <RoleGuard allowedRoles={['student']}>
+    <>
       <div className="space-y-8">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
@@ -457,6 +456,6 @@ export default function StudentDashboard() {
           </div>
         </div>
       </div>
-    </RoleGuard>
+    </>
   );
 }

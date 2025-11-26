@@ -7,7 +7,6 @@ import { SubjectCard } from '@/components/dashboard/tutor/SubjectCard';
 import { SubmissionTable } from '@/components/dashboard/tutor/SubmissionTable';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { RoleGuard } from '@/components/auth/RoleGuard';
 
 const subjects = [
   { title: 'Advanced Mathematics', studentCount: 32 },
@@ -36,7 +35,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <RoleGuard allowedRoles={['tutor']}>
+    <>
       <div className="p-8">
         {/* Page Heading & Session Info */}
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -107,6 +106,6 @@ export default function DashboardPage() {
         studentName={selectedSubmission?.studentName || ''}
         assignmentTitle={selectedSubmission?.assignmentTitle || ''}
       />
-    </RoleGuard>
+    </>
   );
 }
