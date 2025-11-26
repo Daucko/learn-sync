@@ -12,8 +12,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/webhooks(.*)',
 ]);
 
-export default clerkMiddleware((auth, req) => {
-  const { userId, sessionClaims } = auth();
+export default clerkMiddleware(async (auth, req) => {
+  const { userId, sessionClaims, redirectToSignIn } = await auth();
   const pathname = req.nextUrl.pathname;
 
   // Allow public routes
@@ -23,9 +23,7 @@ export default clerkMiddleware((auth, req) => {
 
   // Redirect unauthenticated users to login
   if (!userId) {
-    const signInUrl = new URL('/login', req.url);
-    signInUrl.searchParams.set('redirect_url', pathname);
-    return NextResponse.redirect(signInUrl);
+    return redirectToSignIn({ returnBackUrl: req.url });
   }
 
   // Handle dashboard routes with role-based access control
