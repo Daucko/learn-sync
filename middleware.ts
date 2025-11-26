@@ -1,6 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
 // Define public routes that don't require authentication
 const isPublicRoute = createRouteMatcher([
@@ -12,10 +11,6 @@ const isPublicRoute = createRouteMatcher([
   '/complete-signup(.*)',
   '/api/auth/ensure(.*)',
   '/api/webhooks(.*)',
-  '/_next(.*)',
-  '/favicon.ico',
-  '/assets(.*)',
-  '/images(.*)',
 ]);
 
 // Define role-based dashboard routes
@@ -26,22 +21,11 @@ const isDashboardRoute = createRouteMatcher([
   '/dashboards/super-admin(.*)',
 ]);
 
-// Define API routes that require authentication
-const isProtectedApiRoute = createRouteMatcher([
-  '/api/user(.*)',
-  '/api/subjects(.*)',
-  '/api/courses(.*)',
-  '/api/assignments(.*)',
-  '/api/submissions(.*)',
-  '/api/notifications(.*)',
-  '/api/content(.*)',
-]);
-
-export default clerkMiddleware(async (auth, req: NextRequest) => {
-  const { userId, sessionClaims } = await auth();
+export default clerkMiddleware((auth, req) => {
+  const { userId, sessionClaims } = auth();
   const pathname = req.nextUrl.pathname;
 
-  // Allow public routes
+  // Allow public routes to pass through
   if (isPublicRoute(req)) {
     return NextResponse.next();
   }
@@ -53,18 +37,11 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return NextResponse.redirect(signInUrl);
   }
 
-  // Get user role from Clerk public metadata
-  const userRole = (sessionClaims?.publicMetadata as { role?: string })?.role;
-
-  // Handle protected API routes
-  if (isProtectedApiRoute(req)) {
-    // Allow authenticated users to access API routes
-    // Additional role-based API restrictions can be added here if needed
-    return NextResponse.next();
-  }
-
   // Handle dashboard routes with role-based access control
   if (isDashboardRoute(req)) {
+    // Get user role from Clerk public metadata
+    const userRole = (sessionClaims?.publicMetadata as { role?: string })?.role;
+
     // Extract the role from the dashboard path
     const dashboardRole = pathname.split('/dashboards/')[1]?.split('/')[0];
 
@@ -86,9 +63,6 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
       const correctDashboard = `/dashboards/${normalizedUserRole}`;
       return NextResponse.redirect(new URL(correctDashboard, req.url));
     }
-
-    // User has correct role, allow access
-    return NextResponse.next();
   }
 
   // Default: allow request to proceed
@@ -97,7 +71,7 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
+    // Skip Next.js internals and all static files
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
     // Always run for API routes
     '/(api|trpc)(.*)',
