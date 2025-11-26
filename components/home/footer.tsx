@@ -1,4 +1,6 @@
 import { BookOpen, Twitter, Linkedin } from 'lucide-react';
+import LearnSync from '@/components/assets/LearnSync-logo (2).png';
+import Image from 'next/image';
 
 interface FooterLinkProps {
   href: string;
@@ -21,13 +23,16 @@ export default function Footer() {
     <footer className="bg-muted px-4 sm:px-10 py-16 dark:bg-gray-800/50">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
-          <div className="col-span-2 lg:col-span-2 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-6 h-6 text-secondary">
-                <BookOpen className="w-6 h-6" />
-              </div>
-              <h2 className="text-xl font-bold">LearnSync</h2>
-            </div>
+          <div className="col-span-2 lg:col-span-2 space-y-1">
+            {/* Logo */}
+            <Image
+              src={LearnSync}
+              alt="LearnSync Logo"
+              width={100}
+              height={30}
+              className="object-cover"
+            />
+
             <p className="text-sm text-muted-foreground max-w-md">
               Your learning journey, simplified and organized. The central hub
               for all your assignments, tutorials, and grades.
