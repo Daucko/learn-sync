@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { hashPassword } from '@/lib/auth-utils';
 import z, { zodErrorMessage } from '@/lib/validators';
 import { UserRole } from '@prisma/client';
+import { sendVerificationEmail } from '@/lib/mail';
 
 export async function POST(req: Request) {
     try {
@@ -81,8 +82,8 @@ export async function POST(req: Request) {
             },
         });
 
-        // In a real app, send email here. For now, we'll just log it.
-        console.log(`Verification code for ${email}: ${verificationCode}`);
+        // Send verification email
+        await sendVerificationEmail(email, verificationCode, fullName);
 
         return NextResponse.json({
             message: 'Registration successful. Please verify your email.',
