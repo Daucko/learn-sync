@@ -46,13 +46,13 @@ export default function Header() {
           <ThemeToggle />
           <Button
             variant="ghost"
-            className="text-gray-600 dark:text-gray-300 pointer-events-none"
+            className="text-gray-600 dark:text-gray-300"
             asChild
           >
             <Link href="/login">Sign In</Link>
           </Button>
           <Button
-            className="bg-primary hover:bg-primary/80 pointer-events-none"
+            className="bg-primary hover:bg-primary/80"
             asChild
           >
             <Link href="/signup">Get Started</Link>
