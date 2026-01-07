@@ -11,7 +11,6 @@ export const OrganizationUpdateSchema = OrganizationCreateSchema.partial();
 
 // User (server-side creation fields)
 export const UserCreateSchema = z.object({
-  clerkId: z.string().optional(),
   email: z.string().email(),
   fullName: z.string().nullable().optional(),
   role: z.enum(['STUDENT', 'TUTOR', 'SCHOOL_ADMIN', 'SUPER_ADMIN']).optional(),
