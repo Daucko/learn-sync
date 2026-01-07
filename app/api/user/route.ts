@@ -4,7 +4,9 @@ import { UserCreateSchema, zodErrorMessage } from '@/lib/validators';
 
 export async function GET() {
   try {
-    const items = await prisma.user.findMany();
+    const items = await prisma.user.findMany({
+      include: { organization: true },
+    });
     return ok(items);
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
