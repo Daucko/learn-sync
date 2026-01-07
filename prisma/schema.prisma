@@ -31,144 +31,148 @@ enum ContentType {
 }
 
 model Organization {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  email     String?
-  phone     String?
-  address   String?
+  id      String  @id @default(uuid()) @db.Uuid
+  name    String
+  email   String?
+  phone   String?
+  address String?
 
-  users     User[]
-  subjects  Subject[]
+  users    User[]
+  subjects Subject[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model User {
-  id             String    @id @default(uuid()) @db.Uuid
-  clerkId        String?   @unique
-  email          String    @unique
-  fullName       String?
-  role           UserRole  @default(STUDENT)
+  id                  String    @id @default(uuid()) @db.Uuid
+  clerkId             String?   @unique
+  email               String    @unique
+  passwordHash        String?
+  fullName            String?
+  role                UserRole  @default(STUDENT)
+  emailVerified       Boolean   @default(false)
+  verificationCode    String?
+  verificationExpires DateTime?
 
   // Relations
   organization   Organization? @relation(fields: [organizationId], references: [id])
-  organizationId String? @db.Uuid
+  organizationId String?       @db.Uuid
 
-  submissions    Submission[]
-  notifications  Notification[]
-  uploads        ContentUpload[]
+  submissions   Submission[]
+  notifications Notification[]
+  uploads       ContentUpload[]
 
   // Enrollments and teaching assignments
-  courses        Course[]        @relation("CourseStudents")
-  teaches        Subject[]       @relation("SubjectTutors")
+  courses Course[]  @relation("CourseStudents")
+  teaches Subject[] @relation("SubjectTutors")
 
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Subject {
-  id             String        @id @default(uuid()) @db.Uuid
-  title          String
-  code           String?       @unique
-  grade          String?
+  id    String  @id @default(uuid()) @db.Uuid
+  title String
+  code  String? @unique
+  grade String?
 
-  organization   Organization  @relation(fields: [organizationId], references: [id])
-  organizationId String @db.Uuid
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String       @db.Uuid
 
-  courses        Course[]
+  courses Course[]
 
   // Back relation for ContentUpload.subject
-  uploads        ContentUpload[]
+  uploads ContentUpload[]
 
   // Tutors for this subject (many-to-many)
-  tutors         User[]        @relation("SubjectTutors")
+  tutors User[] @relation("SubjectTutors")
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Course {
-  id          String     @id @default(uuid()) @db.Uuid
+  id          String  @id @default(uuid()) @db.Uuid
   title       String
   description String?
 
-  subject     Subject    @relation(fields: [subjectId], references: [id])
-  subjectId   String @db.Uuid
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  subjectId String  @db.Uuid
 
   assignments Assignment[]
 
   // Students enrolled (many-to-many)
-  students    User[]     @relation("CourseStudents")
+  students User[] @relation("CourseStudents")
 
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Assignment {
-  id          String   @id @default(uuid()) @db.Uuid
+  id          String    @id @default(uuid()) @db.Uuid
   title       String
   description String?
   dueDate     DateTime?
   maxMarks    Int?
 
-  course      Course   @relation(fields: [courseId], references: [id])
-  courseId    String @db.Uuid
+  course   Course @relation(fields: [courseId], references: [id])
+  courseId String @db.Uuid
 
   submissions Submission[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Submission {
-  id           String            @id @default(uuid()) @db.Uuid
-  student      User              @relation(fields: [studentId], references: [id])
-  studentId    String @db.Uuid
+  id        String @id @default(uuid()) @db.Uuid
+  student   User   @relation(fields: [studentId], references: [id])
+  studentId String @db.Uuid
 
-  assignment   Assignment        @relation(fields: [assignmentId], references: [id])
-  assignmentId String @db.Uuid
+  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+  assignmentId String     @db.Uuid
 
-  status       SubmissionStatus  @default(PENDING)
-  grade        Int?
-  feedback     String?
-  submittedAt  DateTime          @default(now())
-  fileUrl      String?
+  status      SubmissionStatus @default(PENDING)
+  grade       Int?
+  feedback    String?
+  submittedAt DateTime         @default(now())
+  fileUrl     String?
 
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([studentId, assignmentId])
 }
 
 model Notification {
-  id        String   @id @default(uuid()) @db.Uuid
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String @db.Uuid
+  id     String @id @default(uuid()) @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @db.Uuid
 
-  title     String
-  body      String?
-  read      Boolean  @default(false)
+  title String
+  body  String?
+  read  Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model ContentUpload {
-  id          String      @id @default(uuid()) @db.Uuid
-  user        User        @relation(fields: [userId], references: [id])
-  userId      String @db.Uuid
+  id     String @id @default(uuid()) @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @db.Uuid
 
   type        ContentType @default(RESOURCE)
   title       String
   description String?
   url         String?
 
-  subject     Subject?    @relation(fields: [subjectId], references: [id])
-  subjectId   String? @db.Uuid
+  subject   Subject? @relation(fields: [subjectId], references: [id])
+  subjectId String?  @db.Uuid
 
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Junction tables are implicitly created by Prisma for many-to-many relations above.
