@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -120,8 +122,8 @@ export default function LoginPage() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex-1 py-2 px-4 text-center rounded-md font-medium transition-all duration-200 ${activeTab === tab.id
-                        ? 'text-text-primary dark:text-gray-300 bg-white dark:bg-gray-700 shadow-sm'
-                        : 'text-text-secondary dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                      ? 'text-text-primary dark:text-gray-300 bg-white dark:bg-gray-700 shadow-sm'
+                      : 'text-text-secondary dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                       }`}
                   >
                     {tab.label}

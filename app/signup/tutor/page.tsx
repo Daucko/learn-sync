@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers/auth-provider';
 
 export default function TutorRegistration() {
+  const [organizations, setOrganizations] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedOrganization, setSelectedOrganization] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,26 +31,20 @@ export default function TutorRegistration() {
   const router = useRouter();
   const { register } = useAuth();
 
-  const organizations = [
-    {
-      id: 'northwood',
-      name: 'Northwood High School',
-      location: 'Irvine, CA',
-      stats: '120 Teachers, 2500 Students',
-    },
-    {
-      id: 'canyon',
-      name: 'Canyon University',
-      location: 'Phoenix, AZ',
-      stats: '850 Faculty, 20000 Students',
-    },
-    {
-      id: 'oakridge',
-      name: 'Oakridge International Academy',
-      location: 'Austin, TX',
-      stats: '95 Teachers, 1800 Students',
-    },
-  ];
+  useEffect(() => {
+    const fetchOrganizations = async () => {
+      try {
+        const res = await fetch('/api/organization');
+        const data = await res.json();
+        if (data.success) {
+          setOrganizations(data.data);
+        }
+      } catch (err) {
+        console.error('Error fetching organizations:', err);
+      }
+    };
+    fetchOrganizations();
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -175,35 +170,39 @@ export default function TutorRegistration() {
 
               {/* Organization List */}
               <div className="space-y-4">
-                {organizations.map((org) => (
-                  <label
-                    key={org.id}
-                    className={`flex cursor-pointer items-center justify-between gap-4 rounded-lg border p-4 transition-all ${selectedOrganization === org.id
-                      ? 'border-secondary ring-2 ring-secondary/50'
-                      : 'border-border-color dark:border-gray-600'
-                      }`}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="bg-gray-100 dark:bg-gray-700 rounded-lg size-12 shrink-0"></div>
-                      <div className="flex flex-col justify-center">
-                        <p className="font-semibold text-text-primary dark:text-background-light">
-                          {org.name}
-                        </p>
-                        <p className="text-sm text-text-secondary dark:text-gray-400">
-                          {org.location} • {org.stats}
-                        </p>
+                {organizations
+                  .filter(org => org.name.toLowerCase().includes(formData.organizationSearch.toLowerCase()))
+                  .map((org) => (
+                    <label
+                      key={org.id}
+                      className={`flex cursor-pointer items-center justify-between gap-4 rounded-lg border p-4 transition-all ${selectedOrganization === org.id
+                        ? 'border-secondary ring-2 ring-secondary/50'
+                        : 'border-border-color dark:border-gray-600'
+                        }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="bg-gray-100 dark:bg-gray-700 rounded-lg size-12 shrink-0 flex items-center justify-center">
+                          <BookOpen className="h-6 w-6 text-gray-400" />
+                        </div>
+                        <div className="flex flex-col justify-center">
+                          <p className="font-semibold text-text-primary dark:text-background-light">
+                            {org.name}
+                          </p>
+                          <p className="text-sm text-text-secondary dark:text-gray-400">
+                            {org.address || 'Address not listed'}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <input
-                      type="radio"
-                      name="organization"
-                      value={org.id}
-                      checked={selectedOrganization === org.id}
-                      onChange={() => handleOrganizationSelect(org.id)}
-                      className="h-5 w-5 text-secondary focus:ring-secondary border-gray-300"
-                    />
-                  </label>
-                ))}
+                      <input
+                        type="radio"
+                        name="organization"
+                        value={org.id}
+                        checked={selectedOrganization === org.id}
+                        onChange={() => handleOrganizationSelect(org.id)}
+                        className="h-5 w-5 text-secondary focus:ring-secondary border-gray-300"
+                      />
+                    </label>
+                  ))}
               </div>
 
               {/* Continue Button */}

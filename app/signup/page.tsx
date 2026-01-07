@@ -1,4 +1,4 @@
-'use client';
+ m'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -52,7 +52,7 @@ export default function RegistrationChoices() {
     // Find the selected role's route
     const selectedRoleData = roles.find((role) => role.id === roleId);
 
-    if (selectedRoleData && (roleId === 'school-admin' || roleId === 'tutor')) {
+    if (selectedRoleData) {
       // Store the selected role in sessionStorage for the next step
       sessionStorage.setItem(
         'registrationData',

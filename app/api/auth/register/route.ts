@@ -70,6 +70,13 @@ export async function POST(req: Request) {
             organizationId = org.id;
         }
 
+        if ((normalizedRole === 'STUDENT' || normalizedRole === 'TUTOR') && !organizationId) {
+            return NextResponse.json(
+                { error: 'Organization is required for this role' },
+                { status: 400 }
+            );
+        }
+
         const user = await prisma.user.create({
             data: {
                 email,
