@@ -1,32 +1,25 @@
 // lib/prisma.ts
+// Prisma client singleton to avoid multiple instances in development
+
 import { PrismaClient } from '@prisma/client';
-import { withAccelerate } from '@prisma/extension-accelerate';
 
-// Create a PrismaClient and apply extensions. Cast the extended client
-// back to PrismaClient to provide a stable exported type and avoid
-// union-overload call signature issues in TypeScript.
-function createClient(): PrismaClient {
-  const base = new PrismaClient({
-    log:
-      process.env.NODE_ENV === 'development'
-        ? ['query', 'error', 'warn']
-        : ['error'],
-  });
-  // $extends can produce a different client type; cast to PrismaClient
-  // so consumers see a consistent API surface for typing purposes.
-  return base.$extends(withAccelerate()) as unknown as PrismaClient;
-}
+import { Pool } from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
 
-type GlobalPrisma = typeof globalThis & {
-  prisma?: PrismaClient;
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
 };
 
-const globalForPrisma = globalThis as GlobalPrisma;
+const connectionString = `${process.env.DATABASE_URL}`;
 
-export const prisma: PrismaClient = globalForPrisma.prisma ?? createClient();
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
-}
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    adapter,
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  });
 
-export default prisma;
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
