@@ -1,62 +1,89 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { jwtVerify } from 'jose';
 
-const isPublicRoute = createRouteMatcher([
+const JWT_SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET || 'fallback-secret-for-development-replace-in-production'
+);
+
+const PUBLIC_ROUTES = [
   '/',
-  '/login(.*)',
-  '/signup(.*)',
-  '/verify-email(.*)',
-  '/oauth-callback(.*)',
-  '/complete-signup(.*)',
-  '/api/auth/ensure(.*)',
-  '/api/webhooks(.*)',
-]);
+  '/login',
+  '/signup',
+  '/verify-email',
+  '/oauth-callback',
+  '/complete-signup',
+];
 
-export default clerkMiddleware(async (auth, req) => {
-  const { userId, sessionClaims, redirectToSignIn } = await auth();
-  const pathname = req.nextUrl.pathname;
+const PUBLIC_API_ROUTES = [
+  '/api/auth/register',
+  '/api/auth/login',
+  '/api/auth/verify',
+  '/api/auth/me',
+  '/api/auth/logout',
+  '/api/auth/ensure',
+];
 
-  // Allow public routes
-  if (isPublicRoute(req)) {
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // Allow file requests and _next internals
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.includes('.') ||
+    pathname.includes('favicon.ico')
+  ) {
     return NextResponse.next();
   }
 
-  // Redirect unauthenticated users to login
-  if (!userId) {
-    return redirectToSignIn({ returnBackUrl: req.url });
+  // Allow public routes
+  const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname === route || pathname.startsWith(route + '/'));
+  const isPublicApiRoute = PUBLIC_API_ROUTES.some((route) => pathname.startsWith(route));
+
+  if (isPublicRoute || isPublicApiRoute) {
+    return NextResponse.next();
   }
 
-  // Handle dashboard routes with role-based access control
-  if (pathname.startsWith('/dashboards')) {
-    // Get user role from Clerk public metadata
-    const publicMetadata = sessionClaims?.publicMetadata as
-      | { role?: string }
-      | undefined;
-    const userRole = publicMetadata?.role;
+  const token = req.cookies.get('session')?.value;
 
-    // Extract the role from the dashboard path
-    const dashboardRole = pathname.split('/dashboards/')[1]?.split('/')[0];
-
-    // If user doesn't have a role yet, redirect to complete signup
-    if (!userRole) {
-      return NextResponse.redirect(new URL('/complete-signup', req.url));
-    }
-
-    // Normalize roles for comparison
-    const normalizedUserRole = userRole.toLowerCase().replace(/_/g, '-');
-    const normalizedDashboardRole = dashboardRole
-      ?.toLowerCase()
-      .replace(/_/g, '-');
-
-    // Redirect if user is accessing wrong dashboard
-    if (normalizedUserRole !== normalizedDashboardRole) {
-      const correctDashboard = `/dashboards/${normalizedUserRole}`;
-      return NextResponse.redirect(new URL(correctDashboard, req.url));
-    }
+  if (!token) {
+    const url = new URL('/login', req.url);
+    url.searchParams.set('returnBackUrl', pathname);
+    return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
-});
+  try {
+    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const userRole = payload.role as string;
+
+    // Handle dashboard routes with role-based access control
+    if (pathname.startsWith('/dashboards')) {
+      const dashboardRole = pathname.split('/dashboards/')[1]?.split('/')[0];
+
+      if (!userRole) {
+        return NextResponse.redirect(new URL('/signup', req.url));
+      }
+
+      // Normalize roles for comparison
+      const normalizedUserRole = userRole.toLowerCase().replace(/_/g, '-');
+      const normalizedDashboardRole = dashboardRole
+        ?.toLowerCase()
+        .replace(/_/g, '-');
+
+      // Redirect if user is accessing wrong dashboard
+      if (normalizedUserRole !== normalizedDashboardRole) {
+        const correctDashboard = `/dashboards/${normalizedUserRole}`;
+        return NextResponse.redirect(new URL(correctDashboard, req.url));
+      }
+    }
+
+    return NextResponse.next();
+  } catch (err) {
+    const url = new URL('/login', req.url);
+    url.searchParams.set('returnBackUrl', pathname);
+    return NextResponse.redirect(url);
+  }
+}
 
 export const config = {
   matcher: [

@@ -1,6 +1,3 @@
-// app/signup/tutor/page.tsx
-'use client';
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { BookOpen, Search, Upload, Play } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useSignUp } from '@clerk/nextjs';
+import { useAuth } from '@/components/providers/auth-provider';
 
 export default function TutorRegistration() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -29,7 +26,7 @@ export default function TutorRegistration() {
   });
 
   const router = useRouter();
-  const { isLoaded, signUp } = useSignUp();
+  const { register } = useAuth();
 
   const organizations = [
     {
@@ -82,81 +79,19 @@ export default function TutorRegistration() {
 
   const handleTutorSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!isLoaded) {
-      console.error('Clerk not loaded');
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      // Create the tutor account with Clerk
-      await signUp.create({
-        emailAddress: formData.email,
+      await register({
+        email: formData.email,
         password: formData.password,
-        firstName: formData.fullName.split(' ')[0],
-        lastName: formData.fullName.split(' ').slice(1).join(' ') || '',
-        unsafeMetadata: {
-          role: 'tutor',
-          organization: selectedOrganization,
-          specialization: formData.specialization,
-          bio: formData.bio,
-          phone: formData.phone,
-          registrationCompleted: false,
-          approvalStatus: 'pending', // Tutors need approval
-        },
+        fullName: formData.fullName,
+        role: 'tutor',
+        organizationId: selectedOrganization,
       });
-
-      // Prepare email verification
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-
-      // Store registration data for verification page
-      sessionStorage.setItem(
-        'pendingVerification',
-        JSON.stringify({
-          email: formData.email,
-          role: 'tutor',
-          fullName: formData.fullName,
-          organization: selectedOrganization,
-          specialization: formData.specialization,
-        })
-      );
-
-      // Redirect to verification page
-      router.push('/verify-email');
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error('Error during tutor sign-up:', err);
-
-      const maybeErr = err as { errors?: unknown };
-      if (maybeErr.errors && Array.isArray(maybeErr.errors)) {
-        const error = maybeErr.errors[0] as Record<string, unknown> | undefined;
-        const code =
-          typeof error?.code === 'string' ? (error.code as string) : undefined;
-        if (code === 'form_identifier_exists') {
-          alert(
-            'An account with this email already exists. Please log in instead.'
-          );
-        } else if (code === 'form_password_length_too_short') {
-          alert('Password must be at least 8 characters long.');
-        } else if (code === 'form_password_pwned') {
-          alert(
-            'This password has been compromised. Please choose a different password.'
-          );
-        } else {
-          const longMessage =
-            typeof error?.longMessage === 'string'
-              ? (error.longMessage as string)
-              : undefined;
-          const message =
-            typeof error?.message === 'string'
-              ? (error.message as string)
-              : undefined;
-          alert(`Error: ${longMessage ?? message ?? 'Unknown error'}`);
-        }
-      } else {
-        alert('An unexpected error occurred. Please try again.');
-      }
+      alert(err.message || 'An error occurred during registration.');
     } finally {
       setIsLoading(false);
     }
@@ -241,11 +176,10 @@ export default function TutorRegistration() {
                 {organizations.map((org) => (
                   <label
                     key={org.id}
-                    className={`flex cursor-pointer items-center justify-between gap-4 rounded-lg border p-4 transition-all ${
-                      selectedOrganization === org.id
-                        ? 'border-secondary ring-2 ring-secondary/50'
-                        : 'border-border-color dark:border-gray-600'
-                    }`}
+                    className={`flex cursor-pointer items-center justify-between gap-4 rounded-lg border p-4 transition-all ${selectedOrganization === org.id
+                      ? 'border-secondary ring-2 ring-secondary/50'
+                      : 'border-border-color dark:border-gray-600'
+                      }`}
                   >
                     <div className="flex items-center gap-4">
                       <div className="bg-gray-100 dark:bg-gray-700 rounded-lg size-12 shrink-0"></div>
@@ -480,7 +414,7 @@ export default function TutorRegistration() {
                 <div>
                   <Button
                     type="submit"
-                    disabled={!isLoaded || isLoading}
+                    disabled={isLoading}
                     className="w-full h-12 text-sm font-semibold bg-primary hover:bg-primary/90 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isLoading ? (

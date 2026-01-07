@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { currentUser } from '@clerk/nextjs/server';
+import { getSession } from './auth-utils';
 
 export function ok(data: unknown) {
   return NextResponse.json({ success: true, data });
@@ -10,7 +10,7 @@ export function err(message: string, status = 400) {
 }
 
 export async function requireAuth() {
-  const user = await currentUser();
-  if (!user) throw new Error('UNAUTHENTICATED');
-  return user;
+  const session = await getSession();
+  if (!session) throw new Error('UNAUTHENTICATED');
+  return session;
 }

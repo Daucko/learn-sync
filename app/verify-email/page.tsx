@@ -1,117 +1,57 @@
 // app/verify-email/page.tsx
 'use client';
 
-import { useSignUp, useSession } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/components/providers/auth-provider';
 
 export default function VerifyEmail() {
-  const { isLoaded, signUp, setActive } = useSignUp();
-  const { session } = useSession();
+  const { verify, user, isLoading: isAuthLoading } = useAuth();
   const [code, setCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState('');
+  const [email, setEmail] = useState('');
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is already signed in
-    if (session) {
-      redirectToRoleDashboard(session.user.unsafeMetadata?.role as string);
+    // If user is already verified and logged in, redirect
+    if (user && user.emailVerified) {
+      const roleSlug = user.role.toLowerCase().replace(/_/g, '-');
+      router.push(`/dashboards/${roleSlug}`);
       return;
     }
 
-    // Check if there's a pending verification
+    // Get email from sessionStorage
     const pendingVerification = sessionStorage.getItem('pendingVerification');
-    if (!pendingVerification || !isLoaded) {
+    if (pendingVerification) {
+      const data = JSON.parse(pendingVerification);
+      setEmail(data.email || '');
+    } else if (!user) {
+      // If no pending verification and no user, go home
       router.push('/');
     }
-  }, [router, isLoaded, session]);
-
-  // Function to redirect based on user role
-  const redirectToRoleDashboard = (role: string) => {
-    const basePath = `/${role}`;
-    console.log('Redirecting to:', basePath);
-    router.push(basePath);
-  };
+  }, [user, router]);
 
   const handleVerification = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLoaded) return;
-
     setIsVerifying(true);
     setError('');
 
     try {
-      const result = await signUp.attemptEmailAddressVerification({
-        code,
-      });
-
-      if (result.status === 'complete') {
-        // Set the active session
-        await setActive({ session: result.createdSessionId });
-
-        // Get the role from pending verification data
-        const pendingVerification = sessionStorage.getItem(
-          'pendingVerification'
-        );
-        let userRole = 'student'; // default fallback
-
-        if (pendingVerification) {
-          const data = JSON.parse(pendingVerification);
-          userRole = data.role || 'student';
-        } else {
-          // Fallback: try to get role from the sign-up result
-          userRole = result.createdUserId ? 'student' : 'student';
-        }
-
-        // Clear the pending verification
-        sessionStorage.removeItem('pendingVerification');
-
-        // Redirect to role-specific dashboard
-        redirectToRoleDashboard(userRole);
-      } else {
-        setError('Verification failed. Please try again.');
-        console.log('Verification incomplete:', result);
-      }
-    } catch (err: unknown) {
+      await verify({ email, code });
+      sessionStorage.removeItem('pendingVerification');
+    } catch (err: any) {
       console.error('Error verifying email:', err);
-      const maybeErr = err as { errors?: unknown };
-      if (maybeErr.errors && Array.isArray(maybeErr.errors)) {
-        const first = maybeErr.errors[0] as Record<string, unknown> | undefined;
-        const message =
-          typeof first?.message === 'string' ? first.message : undefined;
-        setError(message ?? 'Invalid verification code');
-      } else {
-        setError('An error occurred during verification');
-      }
+      setError(err.message || 'Invalid verification code');
     } finally {
       setIsVerifying(false);
     }
   };
 
   const handleResendCode = async () => {
-    if (!isLoaded) return;
-
-    try {
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-      alert('Verification code sent!');
-    } catch (err) {
-      console.error('Error resending code:', err);
-      alert('Failed to resend code. Please try again.');
-    }
-  };
-
-  // Get the pending email for display
-  const getPendingEmail = () => {
-    if (typeof window === 'undefined') return '';
-    const pendingVerification = sessionStorage.getItem('pendingVerification');
-    if (pendingVerification) {
-      const data = JSON.parse(pendingVerification);
-      return data.email || '';
-    }
-    return '';
+    alert('Resend functionality not yet implemented in custom auth.');
   };
 
   return (
@@ -125,7 +65,7 @@ export default function VerifyEmail() {
             We sent a verification code to
           </p>
           <p className="mt-1 font-medium text-gray-900 dark:text-white">
-            {getPendingEmail()}
+            {email}
           </p>
         </div>
 
@@ -158,7 +98,7 @@ export default function VerifyEmail() {
 
           <Button
             type="submit"
-            disabled={!isLoaded || isVerifying || code.length < 6}
+            disabled={isVerifying || code.length < 6}
             className="w-full bg-primary cursor-pointer h-11 text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isVerifying ? (

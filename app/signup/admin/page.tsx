@@ -1,13 +1,10 @@
-// app/signup/admin/page.tsx
-'use client';
-
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BookOpen, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useSignUp } from '@clerk/nextjs';
+import { useAuth } from '@/components/providers/auth-provider';
 
 export default function SchoolAdminRegistration() {
   const [showPassword, setShowPassword] = useState(false);
@@ -27,26 +24,7 @@ export default function SchoolAdminRegistration() {
   });
 
   const router = useRouter();
-  const { isLoaded, signUp } = useSignUp();
-
-  useEffect(() => {
-    // Retrieve the registration data from sessionStorage
-    const storedData = sessionStorage.getItem('registrationData');
-    if (storedData) {
-      const parsed = JSON.parse(storedData);
-
-      // Pre-fill admin fields from the initial registration if available
-      setFormData((prev) => ({
-        ...prev,
-        adminName: parsed.fullName || '',
-        adminEmail: parsed.email || '',
-        adminPassword: parsed.password || '',
-      }));
-
-      // Optionally clear it after retrieval
-      sessionStorage.removeItem('registrationData');
-    }
-  }, []);
+  const { register } = useAuth();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -58,81 +36,22 @@ export default function SchoolAdminRegistration() {
 
   const handleAdminSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!isLoaded) {
-      console.error('Clerk not loaded');
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      // Create the school admin account with Clerk
-      await signUp.create({
-        emailAddress: formData.adminEmail,
+      await register({
+        email: formData.adminEmail,
         password: formData.adminPassword,
-        firstName: formData.adminName.split(' ')[0],
-        lastName: formData.adminName.split(' ').slice(1).join(' ') || '',
-        unsafeMetadata: {
-          role: 'school-admin',
-          organizationName: formData.organizationName,
-          organizationEmail: formData.organizationEmail,
-          organizationPhone: formData.organizationPhone,
-          organizationAddress: formData.organizationAddress,
-          adminPhone: formData.adminPhone,
-          registrationCompleted: false,
-          accountStatus: 'active', // School admins are typically active immediately
-        },
+        fullName: formData.adminName,
+        role: 'school-admin',
+        organizationName: formData.organizationName,
+        organizationEmail: formData.organizationEmail,
+        organizationPhone: formData.organizationPhone,
+        organizationAddress: formData.organizationAddress,
       });
-
-      // Prepare email verification
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-
-      // Store registration data for verification page
-      sessionStorage.setItem(
-        'pendingVerification',
-        JSON.stringify({
-          email: formData.adminEmail,
-          role: 'school-admin',
-          fullName: formData.adminName,
-          organizationName: formData.organizationName,
-        })
-      );
-
-      // Redirect to verification page
-      router.push('/verify-email');
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error('Error during school admin sign-up:', err);
-
-      const maybeErr = err as { errors?: unknown };
-      if (maybeErr.errors && Array.isArray(maybeErr.errors)) {
-        const error = maybeErr.errors[0] as Record<string, unknown> | undefined;
-        const code =
-          typeof error?.code === 'string' ? (error.code as string) : undefined;
-        if (code === 'form_identifier_exists') {
-          alert(
-            'An account with this email already exists. Please log in instead.'
-          );
-        } else if (code === 'form_password_length_too_short') {
-          alert('Password must be at least 8 characters long.');
-        } else if (code === 'form_password_pwned') {
-          alert(
-            'This password has been compromised. Please choose a different password.'
-          );
-        } else {
-          const longMessage =
-            typeof error?.longMessage === 'string'
-              ? (error.longMessage as string)
-              : undefined;
-          const message =
-            typeof error?.message === 'string'
-              ? (error.message as string)
-              : undefined;
-          alert(`Error: ${longMessage ?? message ?? 'Unknown error'}`);
-        }
-      } else {
-        alert('An unexpected error occurred. Please try again.');
-      }
+      alert(err.message || 'An error occurred during registration.');
     } finally {
       setIsLoading(false);
     }
@@ -365,16 +284,16 @@ export default function SchoolAdminRegistration() {
                 <div className="flex flex-col items-center gap-4 pt-4">
                   <Button
                     type="submit"
-                    disabled={!isLoaded || isLoading}
-                    className="min-w-40 h-12 rounded-full bg-primary hover:bg-primary/90 w-full text-base font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isLoading}
+                    className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 text-base transition-all duration-200"
                   >
                     {isLoading ? (
                       <div className="flex items-center gap-2">
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                         Creating account...
                       </div>
                     ) : (
-                      'Create Account'
+                      'Register Institution'
                     )}
                   </Button>
                   <p className="text-sm text-gray-600 dark:text-gray-400">

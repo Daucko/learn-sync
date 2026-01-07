@@ -7,8 +7,7 @@ import { BookOpen, School, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { useSignUp } from '@clerk/nextjs';
-import { ClerkCaptchaWrapper } from '../../components/shared/ClerkCaptchaWrapper';
+import { useAuth } from '@/components/providers/auth-provider';
 import LearnSync from '@/components/assets/LearnSync-logo (2).png';
 import Image from 'next/image';
 
@@ -21,7 +20,7 @@ export default function RegistrationChoices() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { isLoaded, signUp } = useSignUp();
+  const { register } = useAuth();
 
   const roles = [
     {
@@ -77,74 +76,18 @@ export default function RegistrationChoices() {
 
   const handleStudentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!isLoaded) {
-      console.error('Clerk not loaded');
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      // Create the user account
-      await signUp.create({
-        emailAddress: formData.email,
+      await register({
+        email: formData.email,
         password: formData.password,
-        firstName: formData.fullName.split(' ')[0],
-        lastName: formData.fullName.split(' ').slice(1).join(' ') || '',
-        unsafeMetadata: {
-          role: selectedRole,
-          registrationCompleted: false,
-        },
+        fullName: formData.fullName,
+        role: selectedRole,
       });
-
-      // Always prepare email verification for new email/password sign-ups
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
-
-      // Store registration data for verification page
-      sessionStorage.setItem(
-        'pendingVerification',
-        JSON.stringify({
-          email: formData.email,
-          role: selectedRole,
-          fullName: formData.fullName,
-        })
-      );
-
-      // Redirect to verification page
-      router.push('/verify-email');
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error('Error during sign-up:', err);
-
-      const maybeErr = err as { errors?: unknown };
-      if (maybeErr.errors && Array.isArray(maybeErr.errors)) {
-        const error = maybeErr.errors[0] as Record<string, unknown> | undefined;
-        const code =
-          typeof error?.code === 'string' ? (error.code as string) : undefined;
-        if (code === 'form_identifier_exists') {
-          alert(
-            'An account with this email already exists. Please log in instead.'
-          );
-        } else if (code === 'form_password_length_too_short') {
-          alert('Password must be at least 8 characters long.');
-        } else if (code === 'form_password_pwned') {
-          alert(
-            'This password has been compromised in data breaches. Please choose a different password.'
-          );
-        } else {
-          const longMessage =
-            typeof error?.longMessage === 'string'
-              ? (error.longMessage as string)
-              : undefined;
-          const message =
-            typeof error?.message === 'string'
-              ? (error.message as string)
-              : undefined;
-          alert(`Error: ${longMessage ?? message ?? 'Unknown error'}`);
-        }
-      } else {
-        alert('An unexpected error occurred. Please try again.');
-      }
+      alert(err.message || 'An error occurred during sign-up.');
     } finally {
       setIsLoading(false);
     }
@@ -310,13 +253,11 @@ export default function RegistrationChoices() {
                       </div>
                     </div>
 
-                    {/* CAPTCHA wrapper */}
-                    <ClerkCaptchaWrapper />
-
+                    {/* Registration Button */}
                     <div>
                       <Button
                         type="submit"
-                        disabled={!isLoaded || isLoading}
+                        disabled={isLoading}
                         className="w-full bg-primary cursor-pointer h-11 text-sm font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isLoading ? (
@@ -350,15 +291,8 @@ export default function RegistrationChoices() {
                         variant="outline"
                         className="w-full h-10 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                         type="button"
-                        onClick={() => {
-                          sessionStorage.setItem('socialSignUpRole', selectedRole);
-                          signUp?.authenticateWithRedirect({
-                            strategy: 'oauth_google',
-                            redirectUrl: '/oauth-callback',
-                            redirectUrlComplete: '/complete-signup',
-                          });
-                        }}
-                        disabled={!isLoaded || isLoading}
+                        onClick={() => alert('Google Social Sign-up not yet implemented in custom auth.')}
+                        disabled={isLoading}
                       >
                         <svg
                           className="h-5 w-5"

@@ -13,6 +13,11 @@ export async function POST(req: Request) {
             password: z.string().min(8),
             fullName: z.string().min(1),
             role: z.string(),
+            organizationName: z.string().optional(),
+            organizationEmail: z.string().optional(),
+            organizationPhone: z.string().optional(),
+            organizationAddress: z.string().optional(),
+            organizationId: z.string().optional(),
         });
 
         const parsed = schema.safeParse(body);
@@ -23,7 +28,17 @@ export async function POST(req: Request) {
             );
         }
 
-        const { email, password, fullName, role } = parsed.data;
+        const {
+            email,
+            password,
+            fullName,
+            role,
+            organizationName,
+            organizationEmail,
+            organizationPhone,
+            organizationAddress,
+            organizationId: providedOrgId,
+        } = parsed.data;
 
         // Check if user exists
         const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -40,6 +55,20 @@ export async function POST(req: Request) {
 
         const normalizedRole = role.replace(/-/g, '_').toUpperCase() as UserRole;
 
+        let organizationId = providedOrgId;
+
+        if (normalizedRole === 'SCHOOL_ADMIN' && organizationName) {
+            const org = await prisma.organization.create({
+                data: {
+                    name: organizationName,
+                    email: organizationEmail,
+                    phone: organizationPhone,
+                    address: organizationAddress,
+                },
+            });
+            organizationId = org.id;
+        }
+
         const user = await prisma.user.create({
             data: {
                 email,
@@ -48,6 +77,7 @@ export async function POST(req: Request) {
                 role: normalizedRole,
                 verificationCode,
                 verificationExpires,
+                organizationId,
             },
         });
 

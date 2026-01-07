@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from 'react';
-import { useClerk } from '@clerk/nextjs';
+import { useAuth } from '@/components/providers/auth-provider';
 
 type Props = {
   children?: React.ReactNode;
@@ -10,16 +10,15 @@ type Props = {
 };
 
 export default function LogoutButton({ children, className, redirectUrl = '/' }: Props) {
-  const { signOut } = useClerk();
+  const { logout } = useAuth();
 
   const onClick = useCallback(async () => {
     try {
-      await signOut({ redirectUrl });
+      await logout();
     } catch (e) {
-      // no-op; Clerk handles errors internally
       console.error(e);
     }
-  }, [signOut, redirectUrl]);
+  }, [logout]);
 
   return (
     <button type="button" onClick={onClick} className={className}>
