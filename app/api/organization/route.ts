@@ -6,7 +6,18 @@ import { OrganizationCreateSchema, zodErrorMessage } from '@/lib/validators';
 export async function GET() {
   try {
     const items = await prisma.organization.findMany({
-      include: { users: true, subjects: true },
+      include: {
+        users: {
+          select: {
+            id: true,
+            email: true,
+            fullName: true,
+            role: true,
+            avatarUrl: true,
+          }
+        },
+        subjects: true
+      },
     });
     return ok(items);
   } catch (e: unknown) {

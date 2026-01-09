@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (res.ok) {
                 setUser(data.user);
                 const roleSlug = data.user.role.toLowerCase().replace(/_/g, '-');
-                router.push(`/dashboards/${roleSlug}`);
+                router.push(`/${roleSlug}`);
             } else {
                 if (data.emailVerified === false) {
                     throw new Error('EMAIL_NOT_VERIFIED');

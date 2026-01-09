@@ -13,6 +13,14 @@ const PUBLIC_ROUTES = [
   '/verify-email',
   '/oauth-callback',
   '/complete-signup',
+  '/dashboards', // Keep this just in case for older redirects
+];
+
+const PROTECTED_ROLES = [
+  'student',
+  'tutor',
+  'school-admin',
+  'super-admin',
 ];
 
 const PUBLIC_API_ROUTES = [
@@ -58,8 +66,19 @@ export async function middleware(req: NextRequest) {
     const userRole = payload.role as string;
 
     // Handle dashboard routes with role-based access control
-    if (pathname.startsWith('/dashboards')) {
-      const dashboardRole = pathname.split('/dashboards/')[1]?.split('/')[0];
+    const pathParts = pathname.split('/');
+    const firstPart = pathParts[1]?.toLowerCase();
+    const isDashboardRoute = PROTECTED_ROLES.includes(firstPart) || pathname.startsWith('/dashboards');
+
+    if (isDashboardRoute) {
+      let dashboardRole = firstPart;
+
+      // Handle /dashboards/role gracefully by redirecting to /role
+      if (pathname.startsWith('/dashboards')) {
+        dashboardRole = pathParts[2]?.toLowerCase();
+        const correctDashboard = `/${dashboardRole}`;
+        return NextResponse.redirect(new URL(correctDashboard, req.url));
+      }
 
       if (!userRole) {
         return NextResponse.redirect(new URL('/signup', req.url));
@@ -67,13 +86,11 @@ export async function middleware(req: NextRequest) {
 
       // Normalize roles for comparison
       const normalizedUserRole = userRole.toLowerCase().replace(/_/g, '-');
-      const normalizedDashboardRole = dashboardRole
-        ?.toLowerCase()
-        .replace(/_/g, '-');
+      const normalizedDashboardRole = dashboardRole?.replace(/_/g, '-');
 
       // Redirect if user is accessing wrong dashboard
       if (normalizedUserRole !== normalizedDashboardRole) {
-        const correctDashboard = `/dashboards/${normalizedUserRole}`;
+        const correctDashboard = `/${normalizedUserRole}`;
         return NextResponse.redirect(new URL(correctDashboard, req.url));
       }
     }

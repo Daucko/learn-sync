@@ -11,7 +11,18 @@ export async function GET(
     const { id } = await params;
     const item = await prisma.organization.findUnique({
       where: { id },
-      include: { users: true, subjects: true },
+      include: {
+        users: {
+          select: {
+            id: true,
+            email: true,
+            fullName: true,
+            role: true,
+            avatarUrl: true,
+          }
+        },
+        subjects: true
+      },
     });
     if (!item) return err('Not found', 404);
     return ok(item);

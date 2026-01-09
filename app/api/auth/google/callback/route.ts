@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
 
         // Redirect to dashboard
         const roleSlug = user.role.toLowerCase().replace(/_/g, '-');
-        return NextResponse.redirect(new URL(`/dashboards/${roleSlug}`, req.url));
+        return NextResponse.redirect(new URL(`/${roleSlug}`, req.url));
 
     } catch (err) {
         console.error('Google OAuth error:', err);
