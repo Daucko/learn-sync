@@ -20,6 +20,10 @@ interface RegisterData extends LoginCredentials {
     fullName: string;
     role: string;
     organizationId?: string;
+    organizationName?: string;
+    organizationEmail?: string;
+    organizationPhone?: string;
+    organizationAddress?: string;
 }
 
 interface AuthContextType {

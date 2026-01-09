@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BookOpen, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers/auth-provider';
 
 export default function SchoolAdminRegistration() {
@@ -25,7 +24,6 @@ export default function SchoolAdminRegistration() {
     adminPhone: '',
   });
 
-  const router = useRouter();
   const { register } = useAuth();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,9 +49,10 @@ export default function SchoolAdminRegistration() {
         organizationPhone: formData.organizationPhone,
         organizationAddress: formData.organizationAddress,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error during school admin sign-up:', err);
-      alert(err.message || 'An error occurred during registration.');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred during registration.';
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }

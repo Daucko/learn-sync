@@ -1,7 +1,7 @@
 // components/email-verification.tsx
 import Link from 'next/link';
 import { MailCheck, BookOpen } from 'lucide-react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 export default function EmailVerification() {

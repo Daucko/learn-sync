@@ -33,12 +33,13 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await login({ email, password });
-    } catch (err: any) {
-      if (err.message === 'EMAIL_NOT_VERIFIED') {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message === 'EMAIL_NOT_VERIFIED') {
         sessionStorage.setItem('pendingVerification', JSON.stringify({ email }));
         router.push('/verify-email');
       } else {
-        alert(err.message || 'Login failed');
+        const errorMessage = err instanceof Error ? err.message : 'Login failed';
+        alert(errorMessage);
       }
     } finally {
       setIsLoading(false);
