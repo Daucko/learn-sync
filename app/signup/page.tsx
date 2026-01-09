@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { BookOpen, School, Users } from 'lucide-react';
@@ -10,9 +10,22 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { useAuth } from '@/components/providers/auth-provider';
 import LearnSync from '@/components/assets/LearnSync-logo (2).png';
 import Image from 'next/image';
+import { Search } from 'lucide-react';
+
+interface Organization {
+  id: string;
+  name: string;
+  address: string | null;
+  email: string | null;
+  phone: string | null;
+}
 
 export default function RegistrationChoices() {
+  const [currentStep, setCurrentStep] = useState(1);
   const [selectedRole, setSelectedRole] = useState('student');
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [selectedOrganization, setSelectedOrganization] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -21,6 +34,21 @@ export default function RegistrationChoices() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { register } = useAuth();
+
+  useEffect(() => {
+    const fetchOrganizations = async () => {
+      try {
+        const res = await fetch('/api/organization');
+        const data = await res.json();
+        if (data.success) {
+          setOrganizations(data.data);
+        }
+      } catch (err) {
+        console.error('Error fetching organizations:', err);
+      }
+    };
+    fetchOrganizations();
+  }, []);
 
   const roles = [
     {
@@ -48,6 +76,11 @@ export default function RegistrationChoices() {
 
   const handleRoleSelect = (roleId: string) => {
     setSelectedRole(roleId);
+
+    if (roleId === 'student') {
+      setCurrentStep(2);
+      return;
+    }
 
     // Find the selected role's route
     const selectedRoleData = roles.find((role) => role.id === roleId);
@@ -84,6 +117,7 @@ export default function RegistrationChoices() {
         password: formData.password,
         fullName: formData.fullName,
         role: selectedRole,
+        organizationId: selectedOrganization,
       });
     } catch (err: any) {
       console.error('Error during sign-up:', err);
@@ -92,6 +126,10 @@ export default function RegistrationChoices() {
       setIsLoading(false);
     }
   };
+
+  const filteredOrganizations = organizations.filter((org) =>
+    org.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-linear-to-b from-emerald-50 to-white dark:from-gray-900 dark:to-gray-950 antialiased">
@@ -139,45 +177,143 @@ export default function RegistrationChoices() {
           {/* Right Side - Registration Form */}
           <div className="flex w-full items-center justify-center bg-white dark:bg-gray-800 py-24 px-4 sm:px-6 lg:px-8">
             <div className="w-full max-w-md space-y-8">
-              {/* Header */}
-              <div>
-                <h1 className="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">
-                  Create your account
-                </h1>
-                <p className="mt-2 text-gray-600 dark:text-gray-400 text-base font-normal leading-normal">
-                  First, tell us who you are.
-                </p>
-              </div>
-
-              {/* Role Selection */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                {roles.map((role) => (
-                  <button
-                    key={role.id}
-                    type="button"
-                    onClick={() => handleRoleSelect(role.id)}
-                    className={`group cursor-pointer rounded-lg border p-4 text-center transition-all ring-2 ring-transparent ring-offset-2 ring-offset-background-light focus:outline-none focus:ring-primary ${selectedRole === role.id
-                      ? 'border-2 border-primary bg-primary/10 ring-primary'
-                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 hover:border-primary'
-                      }`}
-                  >
-                    <div className="mb-3 flex justify-center text-primary">
-                      {role.icon}
-                    </div>
-                    <p className="text-gray-900 dark:text-white text-sm font-medium leading-normal">
-                      {role.label}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {role.description}
-                    </p>
-                  </button>
-                ))}
-              </div>
-
-              {/* Only show form for student role */}
-              {selectedRole === 'student' && (
+              {/* Step 1: Role Selection */}
+              {currentStep === 1 && (
                 <>
-                  {/* Registration Form */}
+                  <div>
+                    <h1 className="text-gray-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">
+                      Create your account
+                    </h1>
+                    <p className="mt-2 text-gray-600 dark:text-gray-400 text-base font-normal leading-normal">
+                      First, tell us who you are.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    {roles.map((role) => (
+                      <button
+                        key={role.id}
+                        type="button"
+                        onClick={() => handleRoleSelect(role.id)}
+                        className={`group cursor-pointer rounded-lg border p-4 text-center transition-all ring-2 ring-transparent ring-offset-2 ring-offset-background-light focus:outline-none focus:ring-primary ${selectedRole === role.id
+                          ? 'border-2 border-primary bg-primary/10 ring-primary'
+                          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 hover:border-primary'
+                          }`}
+                      >
+                        <div className="mb-3 flex justify-center text-primary">
+                          {role.icon}
+                        </div>
+                        <p className="text-gray-900 dark:text-white text-sm font-medium leading-normal">
+                          {role.label}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          {role.description}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* Step 2: Organization Search */}
+              {currentStep === 2 && (
+                <div className="space-y-8">
+                  <div className="text-center">
+                    <p className="text-base font-semibold text-secondary">Step 2 of 3</p>
+                    <h1 className="mt-2 text-3xl font-bold tracking-tight text-text-primary dark:text-white sm:text-4xl">
+                      Find Your School
+                    </h1>
+                    <p className="mt-4 text-lg text-text-secondary dark:text-gray-400">
+                      Select your institution to connect with your teachers and classes.
+                    </p>
+                  </div>
+
+                  <div className="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700">
+                    <div className="bg-secondary h-1.5 rounded-full" style={{ width: '66%' }}></div>
+                  </div>
+
+                  <div className="relative">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                      <Search className="h-5 w-5 text-text-secondary" />
+                    </div>
+                    <Input
+                      type="search"
+                      placeholder="Search for your school or institution..."
+                      className="pl-12 h-12 text-base"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
+                    {filteredOrganizations.map((org) => (
+                      <label
+                        key={org.id}
+                        className={`flex cursor-pointer items-center justify-between gap-4 rounded-lg border p-4 transition-all ${selectedOrganization === org.id
+                          ? 'border-secondary ring-2 ring-secondary/50 bg-secondary/5'
+                          : 'border-border-color dark:border-gray-600'
+                          }`}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="bg-gray-100 dark:bg-gray-700 rounded-lg size-12 shrink-0 flex items-center justify-center">
+                            <BookOpen className="h-6 w-6 text-gray-400" />
+                          </div>
+                          <div className="text-left">
+                            <p className="font-semibold text-text-primary dark:text-white">{org.name}</p>
+                            <p className="text-sm text-text-secondary dark:text-gray-400">{org.address || 'Address not listed'}</p>
+                          </div>
+                        </div>
+                        <input
+                          type="radio"
+                          name="organization"
+                          value={org.id}
+                          checked={selectedOrganization === org.id}
+                          onChange={() => setSelectedOrganization(org.id)}
+                          className="h-5 w-5 text-secondary focus:ring-secondary border-gray-300"
+                        />
+                      </label>
+                    ))}
+                    {filteredOrganizations.length === 0 && (
+                      <p className="text-center text-text-secondary py-8">No organizations found.</p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => setCurrentStep(1)}
+                      className="flex-1 h-12 text-base font-semibold"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      onClick={() => setCurrentStep(3)}
+                      disabled={!selectedOrganization}
+                      className="flex-2 h-12 text-base font-semibold bg-primary hover:bg-primary/90 cursor-pointer disabled:opacity-50"
+                    >
+                      Continue
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Profile Form */}
+              {currentStep === 3 && (
+                <>
+                  <div className="text-center">
+                    <p className="text-base font-semibold text-secondary">Step 3 of 3</p>
+                    <h1 className="mt-2 text-3xl font-bold tracking-tight text-text-primary dark:text-white sm:text-4xl">
+                      Create Your Profile
+                    </h1>
+                    <p className="mt-4 text-lg text-text-secondary dark:text-gray-400">
+                      Enter your details to finish setting up your student account.
+                    </p>
+                  </div>
+
+                  <div className="w-full bg-gray-200 rounded-full h-1.5 dark:bg-gray-700">
+                    <div className="bg-secondary h-1.5 rounded-full" style={{ width: '100%' }}></div>
+                  </div>
+
                   <form onSubmit={handleStudentSubmit} className="space-y-6">
                     <div className="space-y-4">
                       <div>
@@ -253,8 +389,7 @@ export default function RegistrationChoices() {
                       </div>
                     </div>
 
-                    {/* Registration Button */}
-                    <div>
+                    <div className="space-y-4">
                       <Button
                         type="submit"
                         disabled={isLoading}
@@ -266,9 +401,17 @@ export default function RegistrationChoices() {
                             Creating account...
                           </div>
                         ) : (
-                          `Continue as ${roles.find((r) => r.id === selectedRole)?.label
-                          }`
+                          `Complete Registration`
                         )}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setCurrentStep(2)}
+                        className="w-full h-11"
+                        disabled={isLoading}
+                      >
+                        Back to School Search
                       </Button>
                     </div>
                   </form>
