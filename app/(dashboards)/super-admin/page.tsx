@@ -6,21 +6,21 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, Users, GraduationCap, Building2, Activity } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-interface Organization {
-  id: string;
-  name: string;
-  email: string | null;
-  phone: string | null;
-  address: string | null;
-  users: any[];
-}
-
 interface User {
   id: string;
   fullName: string | null;
   email: string;
   role: string;
   organization: Organization | null;
+}
+
+interface Organization {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  users: User[];
 }
 
 export default function SuperAdminDashboard() {

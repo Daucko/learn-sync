@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/components/providers/auth-provider';
 
 export default function VerifyEmail() {
-  const { verify, user, isLoading: isAuthLoading } = useAuth();
+  const { verify, user } = useAuth();
   const [code, setCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState('');
@@ -19,7 +19,7 @@ export default function VerifyEmail() {
     // If user is already verified and logged in, redirect
     if (user && user.emailVerified) {
       const roleSlug = user.role.toLowerCase().replace(/_/g, '-');
-      router.push(`/dashboards/${roleSlug}`);
+      router.push(`/${roleSlug}`);
       return;
     }
 
@@ -42,9 +42,10 @@ export default function VerifyEmail() {
     try {
       await verify({ email, code });
       sessionStorage.removeItem('pendingVerification');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error verifying email:', err);
-      setError(err.message || 'Invalid verification code');
+      const errorMessage = err instanceof Error ? err.message : 'Invalid verification code';
+      setError(errorMessage);
     } finally {
       setIsVerifying(false);
     }

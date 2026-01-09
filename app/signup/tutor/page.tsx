@@ -6,11 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { BookOpen, Search, Upload, Play } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers/auth-provider';
 
+interface Organization {
+  id: string;
+  name: string;
+}
+
 export default function TutorRegistration() {
-  const [organizations, setOrganizations] = useState<any[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedOrganization, setSelectedOrganization] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +32,6 @@ export default function TutorRegistration() {
     cv: null as File | null,
   });
 
-  const router = useRouter();
   const { register } = useAuth();
 
   useEffect(() => {
@@ -86,9 +89,10 @@ export default function TutorRegistration() {
         role: 'tutor',
         organizationId: selectedOrganization,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error during tutor sign-up:', err);
-      alert(err.message || 'An error occurred during registration.');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred during registration.';
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }

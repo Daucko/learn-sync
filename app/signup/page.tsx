@@ -123,9 +123,10 @@ export default function RegistrationChoices() {
         role: selectedRole,
         organizationId: selectedOrganization,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error during sign-up:', err);
-      alert(err.message || 'An error occurred during sign-up.');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred during sign-up.';
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }
