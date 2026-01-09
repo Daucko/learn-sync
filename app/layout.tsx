@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import './globals.css';
@@ -9,6 +9,11 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: 'swap',
   variable: '--font-plus-jakarta',
 });
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1.0,
+};
 
 export const metadata: Metadata = {
   title: 'LearnSync - Your Learning, Simplified',
@@ -23,7 +28,6 @@ export const metadata: Metadata = {
     'student portal',
   ],
   authors: [{ name: 'LearnSync Team' }],
-  viewport: 'width=device-width, initial-scale=1.0',
 };
 
 export default function RootLayout({
