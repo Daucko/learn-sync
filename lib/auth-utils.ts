@@ -14,7 +14,14 @@ export async function comparePasswords(password: string, hash: string) {
     return bcrypt.compare(password, hash);
 }
 
-export async function signToken(payload: any) {
+interface JWTPayload {
+    userId: string;
+    email: string;
+    role: string;
+    [key: string]: any; // Allow for other fields if needed, like exp, iat
+}
+
+export async function signToken(payload: JWTPayload) {
     return new SignJWT(payload)
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()
@@ -26,7 +33,7 @@ export async function verifyToken(token: string) {
     try {
         const { payload } = await jwtVerify(token, JWT_SECRET);
         return payload;
-    } catch (err) {
+    } catch {
         return null;
     }
 }
