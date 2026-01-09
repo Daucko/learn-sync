@@ -11,6 +11,9 @@ import { useAuth } from '@/components/providers/auth-provider';
 interface Organization {
   id: string;
   name: string;
+  address: string | null;
+  email: string | null;
+  phone: string | null;
 }
 
 export default function TutorRegistration() {
