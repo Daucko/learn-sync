@@ -1,7 +1,7 @@
 // app/tutor/student-submissions/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { GradeAssignment } from '@/components/dashboard/tutor/GradeAssignmentModal';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,7 @@ const filterButtons = [
   { label: 'Late', active: false },
 ];
 
-export default function StudentSubmissionsPage() {
+function StudentSubmissionsContent() {
   const searchParams = useSearchParams();
   const assignmentId = searchParams.get('assignmentId');
   const assignmentTitle =
@@ -102,11 +102,10 @@ export default function StudentSubmissionsPage() {
               <Button
                 key={index}
                 variant={filter.active ? 'default' : 'outline'}
-                className={`h-10 px-4 text-sm font-bold ${
-                  filter.active
+                className={`h-10 px-4 text-sm font-bold ${filter.active
                     ? 'bg-primary/20 text-primary hover:bg-primary/30'
                     : 'bg-white text-gray-600 hover:bg-gray-100'
-                }`}
+                  }`}
               >
                 {filter.label}
               </Button>
@@ -126,5 +125,17 @@ export default function StudentSubmissionsPage() {
         assignmentTitle={assignmentTitle}
       />
     </div>
+  );
+}
+
+export default function StudentSubmissionsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    }>
+      <StudentSubmissionsContent />
+    </Suspense>
   );
 }
