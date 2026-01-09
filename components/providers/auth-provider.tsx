@@ -11,11 +11,22 @@ interface User {
     emailVerified: boolean;
 }
 
+interface LoginCredentials {
+    email: string;
+    password?: string;
+}
+
+interface RegisterData extends LoginCredentials {
+    fullName: string;
+    role: string;
+    organizationId?: string;
+}
+
 interface AuthContextType {
     user: User | null;
     isLoading: boolean;
-    login: (data: any) => Promise<void>;
-    register: (data: any) => Promise<void>;
+    login: (data: LoginCredentials) => Promise<void>;
+    register: (data: RegisterData) => Promise<void>;
     verify: (data: { email: string; code: string }) => Promise<void>;
     logout: () => Promise<void>;
     checkAuth: () => Promise<void>;
@@ -49,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         checkAuth();
     }, []);
 
-    const login = async (credentials: any) => {
+    const login = async (credentials: LoginCredentials) => {
         setIsLoading(true);
         try {
             const res = await fetch('/api/auth/login', {
@@ -75,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
-    const register = async (userData: any) => {
+    const register = async (userData: RegisterData) => {
         setIsLoading(true);
         try {
             const res = await fetch('/api/auth/register', {
@@ -115,7 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (res.ok) {
                 setUser(data.user);
                 const roleSlug = data.user.role.toLowerCase().replace(/_/g, '-');
-                router.push(`/dashboards/${roleSlug}`);
+                router.push(`/${roleSlug}`);
             } else {
                 throw new Error(data.error || 'Verification failed');
             }
