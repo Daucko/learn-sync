@@ -10,9 +10,6 @@ import {
   TrendingUp,
   Star,
   ArrowRight,
-  Menu,
-  Clock,
-  Sparkles,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import Footer from './footer';

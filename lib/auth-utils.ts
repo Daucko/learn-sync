@@ -18,7 +18,7 @@ interface JWTPayload {
     userId: string;
     email: string;
     role: string;
-    [key: string]: any; // Allow for other fields if needed, like exp, iat
+    [key: string]: unknown; // Allow for other fields if needed, like exp, iat
 }
 
 export async function signToken(payload: JWTPayload) {
