@@ -58,8 +58,10 @@ export default function HomePage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button className="bg-emerald-600 hover:bg-emerald-700 text-lg px-6 sm:px-8 py-6 h-auto">
-              Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
+            <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-lg px-6 sm:px-8 py-6 h-auto">
+              <Link href="/signup">
+                Get Started <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
             </Button>
             <Button
               variant="outline"
@@ -295,8 +297,10 @@ export default function HomePage() {
               student outcomes with LearnSync.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-white text-emerald-600 hover:bg-gray-100 text-lg px-6 sm:px-8 py-6 h-auto">
-                Start Free Trial <ArrowRight className="ml-2 h-5 w-5" />
+              <Button asChild className="bg-white text-emerald-600 hover:bg-gray-100 text-lg px-6 sm:px-8 py-6 h-auto">
+                <Link href="/signup">
+                  Get Started <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
               </Button>
               <Button
                 variant="outline"

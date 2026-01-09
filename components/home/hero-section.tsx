@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default function HeroSection() {
   return (
@@ -15,10 +16,11 @@ export default function HeroSection() {
             </p>
           </div>
           <Button
+            asChild
             size="lg"
             className="bg-primary hover:bg-primary/90 h-12 px-8 text-base font-bold"
           >
-            Get Started
+            <Link href="/signup">Get Started</Link>
           </Button>
         </div>
 
