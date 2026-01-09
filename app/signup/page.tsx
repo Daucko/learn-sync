@@ -32,11 +32,13 @@ export default function RegistrationChoices() {
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isOrgsLoading, setIsOrgsLoading] = useState(true);
   const router = useRouter();
   const { register } = useAuth();
 
   useEffect(() => {
     const fetchOrganizations = async () => {
+      setIsOrgsLoading(true);
       try {
         const res = await fetch('/api/organization');
         const data = await res.json();
@@ -45,6 +47,8 @@ export default function RegistrationChoices() {
         }
       } catch (err) {
         console.error('Error fetching organizations:', err);
+      } finally {
+        setIsOrgsLoading(false);
       }
     };
     fetchOrganizations();
@@ -246,34 +250,52 @@ export default function RegistrationChoices() {
                   </div>
 
                   <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
-                    {filteredOrganizations.map((org) => (
-                      <label
-                        key={org.id}
-                        className={`flex cursor-pointer items-center justify-between gap-4 rounded-lg border p-4 transition-all ${selectedOrganization === org.id
-                          ? 'border-secondary ring-2 ring-secondary/50 bg-secondary/5'
-                          : 'border-border-color dark:border-gray-600'
-                          }`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="bg-gray-100 dark:bg-gray-700 rounded-lg size-12 shrink-0 flex items-center justify-center">
-                            <BookOpen className="h-6 w-6 text-gray-400" />
+                    {isOrgsLoading ? (
+                      // Skeleton Loading State
+                      Array.from({ length: 3 }).map((_, i) => (
+                        <div
+                          key={`skeleton-${i}`}
+                          className="flex items-center justify-between gap-4 rounded-lg border border-border-color dark:border-gray-600 p-4 animate-pulse"
+                        >
+                          <div className="flex items-center gap-4 w-full">
+                            <div className="bg-gray-200 dark:bg-gray-700 rounded-lg size-12 shrink-0"></div>
+                            <div className="flex flex-col gap-2 w-full">
+                              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                              <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-1/2"></div>
+                            </div>
                           </div>
-                          <div className="text-left">
-                            <p className="font-semibold text-text-primary dark:text-white">{org.name}</p>
-                            <p className="text-sm text-text-secondary dark:text-gray-400">{org.address || 'Address not listed'}</p>
-                          </div>
+                          <div className="h-5 w-5 rounded-full bg-gray-200 dark:bg-gray-700 shrink-0"></div>
                         </div>
-                        <input
-                          type="radio"
-                          name="organization"
-                          value={org.id}
-                          checked={selectedOrganization === org.id}
-                          onChange={() => setSelectedOrganization(org.id)}
-                          className="h-5 w-5 text-secondary focus:ring-secondary border-gray-300"
-                        />
-                      </label>
-                    ))}
-                    {filteredOrganizations.length === 0 && (
+                      ))
+                    ) : filteredOrganizations.length > 0 ? (
+                      filteredOrganizations.map((org) => (
+                        <label
+                          key={org.id}
+                          className={`flex cursor-pointer items-center justify-between gap-4 rounded-lg border p-4 transition-all ${selectedOrganization === org.id
+                            ? 'border-secondary ring-2 ring-secondary/50 bg-secondary/5'
+                            : 'border-border-color dark:border-gray-600'
+                            }`}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg size-12 shrink-0 flex items-center justify-center">
+                              <BookOpen className="h-6 w-6 text-gray-400" />
+                            </div>
+                            <div className="text-left">
+                              <p className="font-semibold text-text-primary dark:text-white">{org.name}</p>
+                              <p className="text-sm text-text-secondary dark:text-gray-400">{org.address || 'Address not listed'}</p>
+                            </div>
+                          </div>
+                          <input
+                            type="radio"
+                            name="organization"
+                            value={org.id}
+                            checked={selectedOrganization === org.id}
+                            onChange={() => setSelectedOrganization(org.id)}
+                            className="h-5 w-5 text-secondary focus:ring-secondary border-gray-300"
+                          />
+                        </label>
+                      ))
+                    ) : (
                       <p className="text-center text-text-secondary py-8">No organizations found.</p>
                     )}
                   </div>
