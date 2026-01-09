@@ -434,7 +434,7 @@ export default function RegistrationChoices() {
                         variant="outline"
                         className="w-full h-10 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                         type="button"
-                        onClick={() => alert('Google Social Sign-up not yet implemented in custom auth.')}
+                        onClick={() => window.location.href = `/api/auth/google?role=${selectedRole.toUpperCase().replace(/-/g, '_')}&organizationId=${selectedOrganization}`}
                         disabled={isLoading}
                       >
                         <svg
