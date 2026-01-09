@@ -1,4 +1,4 @@
-import { BookOpen, Twitter, Linkedin } from 'lucide-react';
+import { Twitter, Linkedin } from 'lucide-react';
 import LearnSync from '@/components/assets/LearnSync-logo (2).png';
 import Image from 'next/image';
 

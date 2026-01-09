@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CloudUpload, File, X, Upload } from 'lucide-react';
+import { CloudUpload, File, X } from 'lucide-react';
 
 export function UploadTutorial() {
   const [tutorialTitle, setTutorialTitle] = useState('');

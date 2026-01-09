@@ -7,7 +7,6 @@ interface SubjectCardProps {
   title: string;
   studentCount: number;
   assignmentCount?: number;
-  color?: 'default' | 'primary' | 'secondary';
   onViewAssignments?: () => void;
   onUploadContent?: () => void;
 }
@@ -16,7 +15,6 @@ export function SubjectCard({
   title,
   studentCount,
   assignmentCount = 0,
-  color = 'default',
   onViewAssignments,
   onUploadContent,
 }: SubjectCardProps) {

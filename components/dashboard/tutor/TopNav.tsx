@@ -1,4 +1,5 @@
-import { Search, Bell, User } from 'lucide-react';
+import { Search, Bell } from 'lucide-react';
+import Image from 'next/image';
 import { ThemeToggle } from '../../theme-toggle';
 import { Input } from '@/components/ui/input';
 
@@ -58,10 +59,12 @@ export function TopNav({
           <div className="flex gap-4 items-center p-2 rounded-lg">
             <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
               {user.avatar ? (
-                <img
+                <Image
                   src={user.avatar}
                   alt={user.name}
-                  className="w-10 h-10 rounded-full object-cover"
+                  width={40}
+                  height={40}
+                  className="rounded-full object-cover"
                 />
               ) : (
                 <span className="text-sm font-medium">
