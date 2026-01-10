@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LearnSync
 
-## Getting Started
+**Transform Assignment Grading Into Minutes, Not Hours.**
 
-First, run the development server:
+LearnSync is an all-in-one educational platform designed to bridge the gap between schools, tutors, and students. By streamlining the assignment lifecycle—from upload to grading and analytics—LearnSync empowers educators to focus on student outcomes rather than administrative overhead.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Multi-Role Dashboards**: Custom interfaces for Students, Tutors, and School Administrators.
+- **Smart Grading**: Efficient evaluation tools with rubrics and quick feedback mechanisms.
+- **Real-Time Analytics**: Insights into student progress and performance trends.
+- **Instant Uploads**: Support for multiple formats including PDF, Word, images, and videos.
+- **Organization Management**: seamless onboarding for schools and departments.
+- **Automated Notifications**: Keep students informed about assignments and grades instantly.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework**: [Next.js 15](https://nextjs.org/) (App Router, Turbopack)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Database**: [PostgreSQL](https://www.postgresql.org/)
+- **ORM**: [Prisma](https://www.prisma.io/)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **Components**: [Radix UI](https://www.radix-ui.com/) & [Lucide React](https://lucide.dev/)
+- **Animations**: [Motion](https://motion.dev/)
+- **Auth**: Custom JWT-based Authentication with Google OAuth support
+- **Emails**: [Nodemailer](https://nodemailer.com/)
 
-## Learn More
+## 🏁 Getting Started
 
-To learn more about Next.js, take a look at the following resources:
+### Prerequisites
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Node.js 20+
+- PostgreSQL database
+- npm or yarn
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Installation
 
-## Deploy on Vercel
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd learn-sync
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. **Environment Setup**:
+   Copy `.env.example` to `.env` and fill in your credentials:
+   ```bash
+   cp .env.example .env
+   ```
+   Key variables required:
+   - `DATABASE_URL`: Your PostgreSQL connection string.
+   - `JWT_SECRET`: For session management.
+   - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`: For Google OAuth.
+   - `EMAIL_SERVER_*`: For verification and notification emails.
+
+4. **Database Migration**:
+   ```bash
+   npm run prisma:generate
+   npm run prisma:migrate
+   ```
+
+5. **Seed the database (Optional)**:
+   ```bash
+   npx prisma db seed
+   ```
+
+6. **Run the development server**:
+   ```bash
+   npm run dev
+   ```
+
+Open [http://localhost:3000](http://localhost:3000) to see the application in action.
+
+## 📂 Project Structure
+
+- `app/`: Next.js App Router (pages, layouts, and API routes).
+- `components/`: Reusable UI components (shadcn/ui based).
+- `lib/`: Utility functions, database clients, and shared logic.
+- `prisma/`: Database schema and migration files.
+- `public/`: Static assets.
+
+## 📄 License
+
+This project is private and intended for internal use.
+
