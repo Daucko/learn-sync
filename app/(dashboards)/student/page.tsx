@@ -180,13 +180,14 @@
 //   );
 // }
 
-// app/student/dashboard/page.tsx
 'use client';
 
+import { useEffect, useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { useAuth } from '@/components/providers/auth-provider';
 import {
   BookOpen,
   Calendar,
@@ -201,9 +202,29 @@ import {
   Megaphone,
   Library,
   GraduationCap,
+  Loader2,
 } from 'lucide-react';
 
+interface Assignment {
+  id: string;
+  title: string;
+  courseId: string;
+  courseTitle?: string;
+  dueDate: string | null;
+  status: 'pending' | 'completed';
+  graded: boolean;
+  submissionId?: string;
+  fileUrl?: string;
+}
+
 export default function StudentDashboard() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<string | null>(null);
+
   const enrolledSubjects = [
     {
       title: 'Introduction to Design',
@@ -223,29 +244,115 @@ export default function StudentDashboard() {
     },
   ];
 
-  const assignments = [
-    {
-      title: 'Design Principles Essay',
-      course: 'DES101',
-      dueDate: 'Due in 3 days',
-      status: 'pending',
-      graded: false,
-    },
-    {
-      title: 'Calculus Problem Set 2',
-      course: 'MTH203',
-      dueDate: 'Due in 5 days',
-      status: 'pending',
-      graded: false,
-    },
-    {
-      title: 'Research Paper Outline',
-      course: 'DES101',
-      dueDate: 'Graded: A-',
-      status: 'completed',
-      graded: true,
-    },
-  ];
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      // Fetch assignments
+      const assignmentsRes = await fetch('/api/assignment');
+      const assignmentsData = await assignmentsRes.json();
+
+      // Fetch submissions for this user
+      const submissionsRes = await fetch('/api/submission');
+      const submissionsData = await submissionsRes.json();
+
+      if (assignmentsData.success) {
+        const formattedAssignments = assignmentsData.data.map((a: any) => {
+          const submission = submissionsData.data?.find(
+            (s: any) => s.assignmentId === a.id && s.studentId === user?.id
+          );
+
+          return {
+            id: a.id,
+            title: a.title,
+            courseId: a.courseId,
+            courseTitle: 'Course', // In a real app, we'd join this
+            dueDate: a.dueDate ? new Date(a.dueDate).toLocaleDateString() : 'No due date',
+            status: submission ? (submission.status === 'GRADED' ? 'completed' : 'completed') : 'pending',
+            graded: submission?.status === 'GRADED',
+            submissionId: submission?.id,
+            fileUrl: submission?.fileUrl,
+          };
+        });
+        setAssignments(formattedAssignments);
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchData();
+    }
+  }, [user?.id]);
+
+  const handleDownload = (fileUrl?: string, title?: string) => {
+    if (!fileUrl) {
+      alert('No file available for download');
+      return;
+    }
+    // Create a temporary link to trigger download
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = `${title || 'assignment'}-submission`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const onUploadClick = (assignmentId: string) => {
+    setSelectedAssignmentId(assignmentId);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !selectedAssignmentId || !user?.id) return;
+
+    try {
+      setUploadingId(selectedAssignmentId);
+
+      // 1. Upload file to /api/upload
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const uploadResult = await uploadRes.json();
+      if (!uploadResult.success) throw new Error(uploadResult.error);
+
+      // 2. Create/Update submission in /api/submission
+      const submissionRes = await fetch('/api/submission', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          assignmentId: selectedAssignmentId,
+          studentId: user.id,
+          fileUrl: uploadResult.data.url,
+          status: 'PENDING',
+        }),
+      });
+
+      const submissionResult = await submissionRes.json();
+      if (!submissionResult.success) throw new Error(submissionResult.error);
+
+      // Refresh data
+      await fetchData();
+      alert('Assignment submitted successfully!');
+    } catch (error: any) {
+      console.error('Upload failed:', error);
+      alert(`Upload failed: ${error.message}`);
+    } finally {
+      setUploadingId(null);
+      setSelectedAssignmentId(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   const notifications = [
     {
@@ -277,12 +384,19 @@ export default function StudentDashboard() {
 
   return (
     <>
+      <input
+        type="file"
+        className="hidden"
+        ref={fileInputRef}
+        onChange={handleFileUpload}
+      />
+
       <div className="space-y-8">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
           <div>
             <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground mt-1">Welcome back, Olivia!</p>
+            <p className="text-muted-foreground mt-1">Welcome back, {user?.fullName || 'Student'}!</p>
           </div>
 
           {/* Current Session Info */}
@@ -348,50 +462,82 @@ export default function StudentDashboard() {
             <section>
               <h2 className="text-xl font-bold mb-4">Upcoming Assignments</h2>
               <div className="space-y-4">
-                {assignments.map((assignment, index) => (
-                  <Card key={index}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={`p-3 rounded-lg ${
-                            assignment.status === 'completed'
-                              ? 'bg-green-100 dark:bg-green-900/20 text-green-600'
-                              : 'bg-orange-100 dark:bg-orange-900/20 text-orange-600'
-                          }`}
-                        >
-                          <GraduationCap className="w-5 h-5" />
-                        </div>
-
-                        <div className="grow">
-                          <p className="font-bold">{assignment.title}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {assignment.course} - {assignment.dueDate}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                          {assignment.graded ? (
-                            <Button className="bg-green-600 hover:bg-green-700">
-                              <Eye className="w-4 h-4 mr-2" />
-                              View Grade
-                            </Button>
-                          ) : (
-                            <>
-                              <Button variant="outline">
-                                <Download className="w-4 h-4 mr-2" />
-                                Download
-                              </Button>
-                              <Button className="bg-orange-500 hover:bg-orange-600">
-                                <Upload className="w-4 h-4 mr-2" />
-                                Upload
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </div>
+                {loading ? (
+                  <div className="flex justify-center p-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : assignments.length === 0 ? (
+                  <Card>
+                    <CardContent className="p-12 text-center text-muted-foreground">
+                      No assignments found.
                     </CardContent>
                   </Card>
-                ))}
+                ) : (
+                  assignments.map((assignment, index) => (
+                    <Card key={assignment.id}>
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-4">
+                          <div
+                            className={`p-3 rounded-lg ${assignment.status === 'completed'
+                                ? 'bg-green-100 dark:bg-green-900/20 text-green-600'
+                                : 'bg-orange-100 dark:bg-orange-900/20 text-orange-600'
+                              }`}
+                          >
+                            <GraduationCap className="w-5 h-5" />
+                          </div>
+
+                          <div className="grow">
+                            <div className="flex items-center gap-2">
+                              <p className="font-bold">{assignment.title}</p>
+                              {assignment.status === 'completed' && (
+                                <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
+                                  Submitted
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {assignment.courseTitle} - {assignment.dueDate}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            {assignment.graded ? (
+                              <Button className="bg-green-600 hover:bg-green-700">
+                                <Eye className="w-4 h-4 mr-2" />
+                                View Grade
+                              </Button>
+                            ) : (
+                              <>
+                                <Button
+                                  variant="outline"
+                                  disabled={!assignment.fileUrl}
+                                  onClick={() => handleDownload(assignment.fileUrl, assignment.title)}
+                                >
+                                  <Download className="w-4 h-4 mr-2" />
+                                  Download
+                                </Button>
+                                <Button
+                                  className="bg-orange-500 hover:bg-orange-600 min-w-28"
+                                  disabled={uploadingId === assignment.id}
+                                  onClick={() => onUploadClick(assignment.id)}
+                                >
+                                  {uploadingId === assignment.id ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <>
+                                      <Upload className="w-4 h-4 mr-2" />
+                                      {assignment.status === 'completed' ? 'Resubmit' : 'Upload'}
+                                    </>
+                                  )}
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
               </div>
             </section>
           </div>
@@ -415,9 +561,8 @@ export default function StudentDashboard() {
                 {notifications.map((notification, index) => (
                   <div
                     key={index}
-                    className={`flex items-start gap-4 ${
-                      notification.muted ? 'opacity-60' : ''
-                    }`}
+                    className={`flex items-start gap-4 ${notification.muted ? 'opacity-60' : ''
+                      }`}
                   >
                     <div
                       className={`p-2.5 rounded-lg mt-0.5 ${notification.bgColor}`}
