@@ -1,13 +1,10 @@
 'use client';
 
 import { Search, Bell } from 'lucide-react';
-import Image from 'next/image';
 import { ThemeToggle } from '../../theme-toggle';
 import { Input } from '@/components/ui/input';
-import { useAuth, User } from '@/components/providers/auth-provider';
 
 interface TopNavProps {
-  user?: Partial<User>;
   showSearch?: boolean;
   showNotifications?: boolean;
   showThemeToggle?: boolean;
@@ -17,14 +14,11 @@ interface TopNavProps {
 
 
 export function TopNav({
-  user: userProp,
   showSearch = true,
   showNotifications = true,
   showThemeToggle = true,
   searchPlaceholder = 'Search for subjects, assignments...',
 }: TopNavProps) {
-  const { user: authUser } = useAuth();
-  const user = authUser || userProp;
   return (
     <header className="h-16 shrink-0 border-b border-sidebar-border bg-sidebar px-8 sticky top-0 z-10">
       <div className="flex h-full items-center justify-between">
@@ -51,34 +45,6 @@ export function TopNav({
               <Bell className="h-5 w-5" />
             </button>
           )}
-
-          <div className="flex gap-4 items-center p-2 rounded-lg">
-            <div className="w-10 h-10 bg-sidebar-accent rounded-full flex items-center justify-center">
-              {user?.avatarUrl ? (
-                <Image
-                  src={user.avatarUrl}
-                  alt={user.fullName || 'User'}
-                  width={40}
-                  height={40}
-                  className="rounded-full object-cover"
-                />
-              ) : (
-                <span className="text-sm font-medium">
-                  {user?.fullName
-                    ? user.fullName
-                      .split(' ')
-                      .map((n: string) => n[0])
-                      .join('')
-                      .toUpperCase()
-                    : '??'}
-                </span>
-              )}
-            </div>
-            <div className="flex flex-col">
-              <h1 className="text-sidebar-foreground text-sm font-medium">{user?.fullName || 'User'}</h1>
-              <p className="text-sidebar-foreground/50 text-xs capitalize">{user?.role?.toLowerCase().replace('_', ' ') || 'Member'}</p>
-            </div>
-          </div>
         </div>
       </div>
     </header>
