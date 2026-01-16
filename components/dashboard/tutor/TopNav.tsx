@@ -30,15 +30,15 @@ export function TopNav({
   searchPlaceholder = 'Search for subjects, assignments...',
 }: TopNavProps) {
   return (
-    <header className="h-16 shrink-0 border-b border-gray-200 bg-white px-8 sticky top-0 z-10">
+    <header className="h-16 shrink-0 border-b border-sidebar-border bg-sidebar px-8 sticky top-0 z-10">
       <div className="flex h-full items-center justify-between">
         <div className="flex flex-1 items-center gap-8">
           {showSearch && (
             <div className="relative flex min-w-40 max-w-sm flex-col">
               <div className="flex w-full flex-1 items-stretch">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-sidebar-foreground/40" />
                 <Input
-                  className="w-full pl-10 bg-white border-gray-300 placeholder:text-gray-500"
+                  className="w-full pl-10 bg-sidebar border-sidebar-border placeholder:text-sidebar-foreground/50 text-sidebar-foreground"
                   placeholder={searchPlaceholder}
                   type="text"
                 />
@@ -51,13 +51,13 @@ export function TopNav({
           {showThemeToggle && <ThemeToggle />}
 
           {showNotifications && (
-            <button className="flex h-10 w-10 items-center justify-center rounded-full text-gray-600 hover:bg-gray-100">
+            <button className="flex h-10 w-10 items-center justify-center rounded-full text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
               <Bell className="h-5 w-5" />
             </button>
           )}
 
           <div className="flex gap-4 items-center p-2 rounded-lg">
-            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-sidebar-accent rounded-full flex items-center justify-center">
               {user.avatar ? (
                 <Image
                   src={user.avatar}
@@ -77,8 +77,8 @@ export function TopNav({
               )}
             </div>
             <div className="flex flex-col">
-              <h1 className="text-gray-900 text-sm font-medium">{user.name}</h1>
-              <p className="text-gray-500 text-xs">{user.role}</p>
+              <h1 className="text-sidebar-foreground text-sm font-medium">{user.name}</h1>
+              <p className="text-sidebar-foreground/50 text-xs">{user.role}</p>
             </div>
           </div>
         </div>

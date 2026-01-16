@@ -41,12 +41,12 @@ export function Sidebar({ navigation = defaultNavigation }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 shrink-0 border-r border-gray-200 bg-white fixed left-0 top-0 h-screen overflow-y-auto">
+    <aside className="w-64 shrink-0 border-r border-sidebar-border bg-sidebar fixed left-0 top-0 h-screen overflow-y-auto">
       <div className="flex h-full flex-col">
         {/* Logo */}
-        <div className="py-4 flex h-16 items-center gap-2 px-4 border-b border-gray-200">
-          <BookOpen className="h-6 w-6 text-secondary" />
-          <h2 className="text-gray-900 text-xl font-bold">LearnSync</h2>
+        <div className="py-4 flex h-16 items-center gap-2 px-4 border-b border-sidebar-border">
+          <BookOpen className="h-6 w-6 text-primary" />
+          <h2 className="text-sidebar-foreground text-xl font-bold">LearnSync</h2>
         </div>
 
         {/* Navigation */}
@@ -63,8 +63,8 @@ export function Sidebar({ navigation = defaultNavigation }: SidebarProps) {
                   className={cn(
                     'flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors',
                     isActive
-                      ? 'bg-secondary/20 text-secondary'
-                      : 'text-gray-600 hover:bg-gray-100'
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
                   )}
                 >
                   <Icon className="h-5 w-5" />
@@ -80,15 +80,15 @@ export function Sidebar({ navigation = defaultNavigation }: SidebarProps) {
               className={cn(
                 'flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors',
                 pathname === '/settings'
-                  ? 'bg-secondary/20 text-secondary'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
               )}
             >
               <Settings className="h-5 w-5" />
               Settings
             </Link>
 
-            <LogoutButton className="flex items-center gap-3 rounded-lg px-4 py-2.5 text-gray-600 hover:bg-gray-100 text-sm font-medium">
+            <LogoutButton className="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm font-medium">
               <LogOut className="h-5 w-5" />
               Log out
             </LogoutButton>
