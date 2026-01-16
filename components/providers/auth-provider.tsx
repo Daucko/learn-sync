@@ -3,12 +3,14 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-interface User {
+export interface User {
     id: string;
     email: string;
     fullName: string | null;
     role: string;
     emailVerified: boolean;
+    avatarUrl?: string | null;
+    initials?: string | null;
 }
 
 interface LoginCredentials {

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import LogoutButton from '@/components/auth/LogoutButton';
+import { useAuth } from '@/components/providers/auth-provider';
 
 interface NavigationItem {
   name: string;
@@ -39,6 +40,15 @@ const defaultNavigation: NavigationItem[] = [
 
 export function Sidebar({ navigation = defaultNavigation }: SidebarProps) {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const userInitials = user?.fullName
+    ? user.fullName
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+    : '??';
 
   return (
     <aside className="w-64 shrink-0 border-r border-sidebar-border bg-sidebar fixed left-0 top-0 h-screen overflow-y-auto">
@@ -87,6 +97,20 @@ export function Sidebar({ navigation = defaultNavigation }: SidebarProps) {
               <Settings className="h-5 w-5" />
               Settings
             </Link>
+
+            <div className="mt-4 mb-2 flex items-center gap-3 px-4 py-3 bg-sidebar-accent/50 rounded-xl border border-sidebar-border/50">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-sm">
+                {userInitials}
+              </div>
+              <div className="flex flex-col min-w-0 overflow-hidden">
+                <span className="text-sm font-semibold text-sidebar-foreground truncate">
+                  {user?.fullName || 'User'}
+                </span>
+                <span className="text-xs text-sidebar-foreground/50 truncate capitalize">
+                  {user?.role?.toLowerCase().replace('_', ' ') || 'Member'}
+                </span>
+              </div>
+            </div>
 
             <LogoutButton className="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm font-medium">
               <LogOut className="h-5 w-5" />

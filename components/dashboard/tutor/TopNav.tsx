@@ -1,34 +1,30 @@
+'use client';
+
 import { Search, Bell } from 'lucide-react';
 import Image from 'next/image';
 import { ThemeToggle } from '../../theme-toggle';
 import { Input } from '@/components/ui/input';
+import { useAuth, User } from '@/components/providers/auth-provider';
 
 interface TopNavProps {
-  user?: {
-    name: string;
-    role: string;
-    avatar?: string;
-    initials?: string;
-  };
+  user?: Partial<User>;
   showSearch?: boolean;
   showNotifications?: boolean;
   showThemeToggle?: boolean;
   searchPlaceholder?: string;
 }
 
-const defaultUser = {
-  name: 'Sarah Jenkins',
-  role: 'Tutor',
-  initials: 'SJ',
-};
+
 
 export function TopNav({
-  user = defaultUser,
+  user: userProp,
   showSearch = true,
   showNotifications = true,
   showThemeToggle = true,
   searchPlaceholder = 'Search for subjects, assignments...',
 }: TopNavProps) {
+  const { user: authUser } = useAuth();
+  const user = authUser || userProp;
   return (
     <header className="h-16 shrink-0 border-b border-sidebar-border bg-sidebar px-8 sticky top-0 z-10">
       <div className="flex h-full items-center justify-between">
@@ -58,27 +54,29 @@ export function TopNav({
 
           <div className="flex gap-4 items-center p-2 rounded-lg">
             <div className="w-10 h-10 bg-sidebar-accent rounded-full flex items-center justify-center">
-              {user.avatar ? (
+              {user?.avatarUrl ? (
                 <Image
-                  src={user.avatar}
-                  alt={user.name}
+                  src={user.avatarUrl}
+                  alt={user.fullName || 'User'}
                   width={40}
                   height={40}
                   className="rounded-full object-cover"
                 />
               ) : (
                 <span className="text-sm font-medium">
-                  {user.initials ||
-                    user.name
+                  {user?.fullName
+                    ? user.fullName
                       .split(' ')
-                      .map((n) => n[0])
-                      .join('')}
+                      .map((n: string) => n[0])
+                      .join('')
+                      .toUpperCase()
+                    : '??'}
                 </span>
               )}
             </div>
             <div className="flex flex-col">
-              <h1 className="text-sidebar-foreground text-sm font-medium">{user.name}</h1>
-              <p className="text-sidebar-foreground/50 text-xs">{user.role}</p>
+              <h1 className="text-sidebar-foreground text-sm font-medium">{user?.fullName || 'User'}</h1>
+              <p className="text-sidebar-foreground/50 text-xs capitalize">{user?.role?.toLowerCase().replace('_', ' ') || 'Member'}</p>
             </div>
           </div>
         </div>

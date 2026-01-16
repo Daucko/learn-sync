@@ -20,11 +20,6 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
 
         <main className="flex-1 ml-64 flex flex-col">
           <TopNav
-            user={{
-              name: 'Alex Johnson',
-              role: 'Student',
-              initials: 'AJ',
-            }}
             searchPlaceholder="Search for courses, materials..."
           />
 
