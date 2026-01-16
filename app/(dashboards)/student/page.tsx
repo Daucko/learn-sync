@@ -182,17 +182,13 @@
 
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/components/providers/auth-provider';
 import {
-  BookOpen,
-  Calendar,
-  BarChart3,
-  Mail,
   Bell,
   Download,
   Upload,
@@ -214,6 +210,21 @@ interface Assignment {
   status: 'pending' | 'completed';
   graded: boolean;
   submissionId?: string;
+  fileUrl?: string;
+}
+
+interface RawAssignment {
+  id: string;
+  title: string;
+  courseId: string;
+  dueDate: string | null;
+}
+
+interface RawSubmission {
+  id: string;
+  assignmentId: string;
+  studentId: string;
+  status: string;
   fileUrl?: string;
 }
 
@@ -244,7 +255,7 @@ export default function StudentDashboard() {
     },
   ];
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       // Fetch assignments
@@ -256,9 +267,9 @@ export default function StudentDashboard() {
       const submissionsData = await submissionsRes.json();
 
       if (assignmentsData.success) {
-        const formattedAssignments = assignmentsData.data.map((a: any) => {
-          const submission = submissionsData.data?.find(
-            (s: any) => s.assignmentId === a.id && s.studentId === user?.id
+        const formattedAssignments = assignmentsData.data.map((a: RawAssignment) => {
+          const submission = (submissionsData.data as RawSubmission[])?.find(
+            (s) => s.assignmentId === a.id && s.studentId === user?.id
           );
 
           return {
@@ -280,13 +291,13 @@ export default function StudentDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
 
   useEffect(() => {
     if (user?.id) {
       fetchData();
     }
-  }, [user?.id]);
+  }, [user?.id, fetchData]);
 
   const handleDownload = (fileUrl?: string, title?: string) => {
     if (!fileUrl) {
@@ -344,9 +355,10 @@ export default function StudentDashboard() {
       // Refresh data
       await fetchData();
       alert('Assignment submitted successfully!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Upload failed:', error);
-      alert(`Upload failed: ${error.message}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      alert(`Upload failed: ${message}`);
     } finally {
       setUploadingId(null);
       setSelectedAssignmentId(null);
@@ -473,14 +485,14 @@ export default function StudentDashboard() {
                     </CardContent>
                   </Card>
                 ) : (
-                  assignments.map((assignment, index) => (
+                  assignments.map((assignment) => (
                     <Card key={assignment.id}>
                       <CardContent className="p-4">
                         <div className="flex items-center gap-4">
                           <div
                             className={`p-3 rounded-lg ${assignment.status === 'completed'
-                                ? 'bg-green-100 dark:bg-green-900/20 text-green-600'
-                                : 'bg-orange-100 dark:bg-orange-900/20 text-orange-600'
+                              ? 'bg-green-100 dark:bg-green-900/20 text-green-600'
+                              : 'bg-orange-100 dark:bg-orange-900/20 text-orange-600'
                               }`}
                           >
                             <GraduationCap className="w-5 h-5" />
