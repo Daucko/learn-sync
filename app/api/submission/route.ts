@@ -4,7 +4,56 @@ import { SubmissionCreateSchema, zodErrorMessage } from '@/lib/validators';
 
 export async function GET() {
   try {
-    const items = await prisma.submission.findMany();
+    const session = await requireAuth();
+    const { role, userId } = session as any;
+
+    let where = {};
+    if (role === 'TUTOR') {
+      where = {
+        assignment: {
+          course: {
+            subject: {
+              tutors: {
+                some: {
+                  id: userId,
+                },
+              },
+            },
+          },
+        },
+      };
+    }
+
+    const items = await prisma.submission.findMany({
+      where,
+      include: {
+        student: {
+          select: {
+            fullName: true,
+            email: true,
+            avatarUrl: true,
+          },
+        },
+        assignment: {
+          select: {
+            title: true,
+            course: {
+              select: {
+                title: true,
+                subject: {
+                  select: {
+                    title: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        submittedAt: 'desc',
+      },
+    });
     return ok(items);
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);

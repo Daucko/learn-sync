@@ -1,57 +1,72 @@
 import { prisma } from '@/lib/prisma';
 import { requireAuth, ok, err } from '@/lib/api';
-import { SubmissionUpdateSchema, zodErrorMessage } from '@/lib/validators';
-import { NextRequest } from 'next/server';
+import { z } from 'zod';
 
-export async function GET(
-  _req: NextRequest,
+const GradeSchema = z.object({
+  grade: z.number().min(0).max(100),
+  feedback: z.string().optional(),
+});
+
+export async function PATCH(
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await requireAuth();
+    const { role, userId } = session as any;
     const { id } = await params;
-    const item = await prisma.submission.findUnique({ where: { id } });
-    if (!item) return err('Not found', 404);
-    return ok(item);
-  } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : String(e);
-    return err(message || 'Error fetching submission');
-  }
-}
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    await requireAuth();
-    const { id } = await params;
+    // Validate body
     const body = await req.json();
-    const parsed = SubmissionUpdateSchema.parse(body);
+    const { grade, feedback } = GradeSchema.parse(body);
+
+    // Check permissions
+    // If Tutor, ensure they are associated with the subject of this submission
+    if (role === 'TUTOR') {
+      const submission = await prisma.submission.findUnique({
+        where: { id },
+        include: {
+          assignment: {
+            include: {
+              course: {
+                include: {
+                  subject: {
+                    include: {
+                      tutors: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!submission) {
+        return err('Submission not found', 404);
+      }
+
+      const isTutorForSubject = submission.assignment.course.subject.tutors.some(
+        (tutor) => tutor.id === userId
+      );
+
+      if (!isTutorForSubject) {
+        return err('Unauthorized to grade this submission', 403);
+      }
+    }
+
     const updated = await prisma.submission.update({
       where: { id },
-      data: parsed,
+      data: {
+        grade,
+        feedback,
+        status: 'GRADED',
+      },
     });
+
     return ok(updated);
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
-    return err(
-      zodErrorMessage(e) || message || 'Error updating submission',
-      422
-    );
-  }
-}
-
-export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    await requireAuth();
-    const { id } = await params;
-    await prisma.submission.delete({ where: { id } });
-    return ok({ id });
-  } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : String(e);
-    return err(message || 'Error deleting submission');
+    return err(message || 'Error updating submission');
   }
 }

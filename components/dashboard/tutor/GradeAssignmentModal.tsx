@@ -17,6 +17,7 @@ import { X } from 'lucide-react';
 interface GradeAssignmentProps {
   isOpen: boolean;
   onClose: () => void;
+  submissionId?: string;
   studentName?: string;
   assignmentTitle?: string;
 }
@@ -24,6 +25,7 @@ interface GradeAssignmentProps {
 export function GradeAssignment({
   isOpen,
   onClose,
+  submissionId,
   studentName = 'Jane Doe',
   assignmentTitle = 'Introduction to Algebra',
 }: GradeAssignmentProps) {
@@ -31,16 +33,34 @@ export function GradeAssignment({
   const [feedback, setFeedback] = useState('');
   const [requestResubmission, setRequestResubmission] = useState(false);
   const [resubmissionReason, setResubmissionReason] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSave = () => {
-    // Handle save logic here
-    console.log({
-      marksObtained,
-      feedback,
-      requestResubmission,
-      resubmissionReason,
-    });
-    onClose();
+  const handleSave = async () => {
+    if (!submissionId) return;
+
+    try {
+      setIsSubmitting(true);
+      const res = await fetch(`/api/submission/${submissionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          grade: Number(marksObtained),
+          feedback: requestResubmission ? `Resubmission requested: ${resubmissionReason}` : feedback,
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to grade submission');
+
+      // Success feedback could be added here
+      onClose();
+      // Optional: Trigger a refresh of the parent list
+      window.location.reload(); // Simple refresh for now
+    } catch (error) {
+      console.error(error);
+      alert('Error saving grade');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const buttonText = requestResubmission ? 'Send Request' : 'Save Grade';
@@ -141,7 +161,7 @@ export function GradeAssignment({
             onClick={handleSave}
             className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600"
           >
-            {buttonText}
+            {isSubmitting ? 'Saving...' : buttonText}
           </Button>
         </footer>
       </DialogContent>

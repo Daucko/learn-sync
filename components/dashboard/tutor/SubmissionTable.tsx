@@ -22,19 +22,32 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { GradeAssignment } from '@/components/dashboard/tutor/GradeAssignmentModal';
-import { submissions, Submission } from '@/lib/data/submissions';
+
+// Define the submission interface matching API response
+export interface Submission {
+  id: string;
+  studentName: string; // mapped from student.fullName
+  assignment: string; // mapped from assignment.title
+  submitted: string; // formatted date
+  status: 'PENDING' | 'GRADED' | 'LATE';
+  statusVariant: 'secondary' | 'default' | 'destructive' | 'outline';
+  late?: boolean;
+  avatarUrl?: string; // mapped from student.avatarUrl
+}
 
 // Define the interface for the onGradeClick parameter
 interface GradeClickParams {
+  submissionId: string;
   studentName: string;
   assignmentTitle: string;
 }
 
 interface SubmissionTableProps {
+  submissions?: Submission[];
   onGradeClick?: (submission: GradeClickParams) => void;
 }
 
-export function SubmissionTable({ onGradeClick }: SubmissionTableProps) {
+export function SubmissionTable({ submissions = [], onGradeClick }: SubmissionTableProps) {
   const [isGradeDialogOpen, setIsGradeDialogOpen] = useState(false);
   const [selectedSubmission, setSelectedSubmission] =
     useState<Submission | null>(null);
@@ -55,6 +68,7 @@ export function SubmissionTable({ onGradeClick }: SubmissionTableProps) {
     // Also call the parent handler if provided
     if (onGradeClick) {
       onGradeClick({
+        submissionId: submission.id,
         studentName: submission.studentName,
         assignmentTitle: submission.assignment,
       });
@@ -131,6 +145,7 @@ export function SubmissionTable({ onGradeClick }: SubmissionTableProps) {
                   <TableCell className="p-4 align-middle">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-9 w-9">
+                        {submission.avatarUrl && <img src={submission.avatarUrl} alt={submission.studentName} className="h-full w-full object-cover" />}
                         <AvatarFallback className="bg-gray-100 text-gray-700 text-sm font-medium">
                           {getAvatarFallback(submission.studentName)}
                         </AvatarFallback>

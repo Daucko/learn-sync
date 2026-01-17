@@ -1,27 +1,76 @@
 // app/tutor/dashboard/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { GradeAssignment } from '@/components/dashboard/tutor/GradeAssignmentModal';
 import { SubjectCard } from '@/components/dashboard/tutor/SubjectCard';
 import { SubmissionTable } from '@/components/dashboard/tutor/SubmissionTable';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
-const subjects = [
-  { title: 'Advanced Mathematics', studentCount: 32 },
-  { title: 'Physics 101', studentCount: 28 },
-  { title: 'Introduction to Programming', studentCount: 45 },
-];
+
 
 export default function DashboardPage() {
   const [isGradeDialogOpen, setIsGradeDialogOpen] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<{
+    submissionId: string;
     studentName: string;
     assignmentTitle: string;
   } | null>(null);
 
+  const [subjects, setSubjects] = useState<any[]>([]);
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [subjectsRes, submissionsRes] = await Promise.all([
+          fetch('/api/subject'),
+          fetch('/api/submission'),
+        ]);
+
+        if (subjectsRes.ok) {
+          const data = await subjectsRes.json();
+          // Transform strict API data to UI format
+          // data.data is the array
+          const subData = data.data || [];
+          const formattedSubjects = subData.map((s: any) => ({
+            title: s.title,
+            studentCount: s.courses.reduce((acc: number, curr: any) => acc + curr._count.students, 0),
+          }));
+          setSubjects(formattedSubjects);
+        }
+
+        if (submissionsRes.ok) {
+          const data = await submissionsRes.json();
+          const subData = data.data || [];
+          // Transform API data to SubmissionTable format
+          const formattedSubmissions = subData.map((s: any) => ({
+            id: s.id,
+            studentName: s.student.fullName || s.student.email,
+            assignment: s.assignment.title,
+            submitted: new Date(s.submittedAt).toLocaleDateString(),
+            status: s.status,
+            statusVariant: s.status === 'GRADED' ? 'default' : s.status === 'LATE' ? 'destructive' : 'secondary',
+            avatarUrl: s.student.avatarUrl,
+            late: s.status === 'LATE' // or calculate based on dueDate
+          }));
+          setSubmissions(formattedSubmissions);
+        }
+
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const handleGradeClick = (submission: {
+    submissionId: string;
     studentName: string;
     assignmentTitle: string;
   }) => {
@@ -44,28 +93,10 @@ export default function DashboardPage() {
               Dashboard
             </h1>
             <p className="text-base font-normal text-muted-foreground">
-              Welcome back, Sarah!
+              Welcome back!
             </p>
           </div>
 
-          {/* <Card className="p-4">
-            <CardContent className="p-0">
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2 bg-cover bg-center">
-                <p className="text-gray-600 text-sm font-normal">
-                  Current Session:
-                </p>
-                <Badge variant="secondary" className="w-fit">
-                  Fall 2024
-                </Badge>
-                <p className="text-gray-600 text-sm font-normal">
-                  Active Term:
-                </p>
-                <Badge variant="default" className="w-fit">
-                  Mid-Term
-                </Badge>
-              </div>
-            </CardContent>
-          </Card> */}
           <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm">
             <div className="flex items-center gap-2">
               <span className="text-gray-600">Session:</span>
@@ -92,17 +123,21 @@ export default function DashboardPage() {
                 studentCount={subject.studentCount}
               />
             ))}
+            {!isLoading && subjects.length === 0 && (
+              <p className="text-gray-500 col-span-3">No subjects found.</p>
+            )}
           </div>
         </section>
 
         {/* Recent Submissions Section */}
-        <SubmissionTable onGradeClick={handleGradeClick} />
+        <SubmissionTable submissions={submissions} onGradeClick={handleGradeClick} />
       </div>
 
       {/* Grade Assignment Modal */}
       <GradeAssignment
         isOpen={isGradeDialogOpen}
         onClose={handleCloseGradeDialog}
+        submissionId={selectedSubmission?.submissionId}
         studentName={selectedSubmission?.studentName || ''}
         assignmentTitle={selectedSubmission?.assignmentTitle || ''}
       />

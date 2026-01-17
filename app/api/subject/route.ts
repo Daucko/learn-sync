@@ -4,7 +4,32 @@ import { SubjectCreateSchema, zodErrorMessage } from '@/lib/validators';
 
 export async function GET() {
   try {
-    const items = await prisma.subject.findMany();
+    const session = await requireAuth();
+    const { role, userId } = session as any;
+
+    let where = {};
+    if (role === 'TUTOR') {
+      where = {
+        tutors: {
+          some: {
+            id: userId,
+          },
+        },
+      };
+    }
+
+    const items = await prisma.subject.findMany({
+      where,
+      include: {
+        courses: {
+          include: {
+            _count: {
+              select: { students: true },
+            },
+          },
+        },
+      },
+    });
     return ok(items);
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
