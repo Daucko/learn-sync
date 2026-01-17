@@ -3,12 +3,18 @@
 
 import { useState, useEffect } from 'react';
 import { GradeAssignment } from '@/components/dashboard/tutor/GradeAssignmentModal';
-import { SubjectCard } from '@/components/dashboard/tutor/SubjectCard';
 import { SubmissionTable } from '@/components/dashboard/tutor/SubmissionTable';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { SubjectCard } from '@/components/dashboard/tutor/SubjectCard';
 
 
+
+
+interface DashboardSubject {
+  title: string;
+  studentCount: number;
+}
+
+import { Submission } from '@/components/dashboard/tutor/SubmissionTable';
 
 export default function DashboardPage() {
   const [isGradeDialogOpen, setIsGradeDialogOpen] = useState(false);
@@ -18,8 +24,8 @@ export default function DashboardPage() {
     assignmentTitle: string;
   } | null>(null);
 
-  const [subjects, setSubjects] = useState<any[]>([]);
-  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [subjects, setSubjects] = useState<DashboardSubject[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -35,9 +41,9 @@ export default function DashboardPage() {
           // Transform strict API data to UI format
           // data.data is the array
           const subData = data.data || [];
-          const formattedSubjects = subData.map((s: any) => ({
+          const formattedSubjects = subData.map((s: { title: string; courses: { _count: { students: number } }[] }) => ({
             title: s.title,
-            studentCount: s.courses.reduce((acc: number, curr: any) => acc + curr._count.students, 0),
+            studentCount: s.courses.reduce((acc: number, curr: { _count: { students: number } }) => acc + curr._count.students, 0),
           }));
           setSubjects(formattedSubjects);
         }
@@ -46,7 +52,13 @@ export default function DashboardPage() {
           const data = await submissionsRes.json();
           const subData = data.data || [];
           // Transform API data to SubmissionTable format
-          const formattedSubmissions = subData.map((s: any) => ({
+          const formattedSubmissions = subData.map((s: {
+            id: string;
+            student: { fullName: string; email: string; avatarUrl?: string };
+            assignment: { title: string };
+            submittedAt: string;
+            status: string
+          }) => ({
             id: s.id,
             studentName: s.student.fullName || s.student.email,
             assignment: s.assignment.title,
