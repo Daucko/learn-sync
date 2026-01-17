@@ -13,7 +13,7 @@ export async function PATCH(
 ) {
   try {
     const session = await requireAuth();
-    const { role, userId } = session as any;
+    const { role, userId } = session;
     const { id } = await params;
 
     // Validate body

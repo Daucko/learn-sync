@@ -14,7 +14,7 @@ export async function comparePasswords(password: string, hash: string) {
     return bcrypt.compare(password, hash);
 }
 
-interface JWTPayload {
+export interface JWTPayload {
     userId: string;
     email: string;
     role: string;

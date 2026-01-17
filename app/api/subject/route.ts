@@ -5,7 +5,7 @@ import { SubjectCreateSchema, zodErrorMessage } from '@/lib/validators';
 export async function GET() {
   try {
     const session = await requireAuth();
-    const { role, userId } = session as any;
+    const { role, userId } = session;
 
     let where = {};
     if (role === 'TUTOR') {
