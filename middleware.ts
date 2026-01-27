@@ -13,6 +13,8 @@ const PUBLIC_ROUTES = [
   '/verify-email',
   '/oauth-callback',
   '/complete-signup',
+  '/forgot-password',
+  '/reset-password',
   '/dashboards', // Keep this just in case for older redirects
 ];
 
@@ -30,6 +32,8 @@ const PUBLIC_API_ROUTES = [
   '/api/auth/me',
   '/api/auth/logout',
   '/api/auth/ensure',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
   '/api/organization',
 ];
 
